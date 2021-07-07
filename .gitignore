@@ -67,6 +67,8 @@ gen-external-apklibs
 obj/
 
 # IntelliJ IDEA
+/.idea/*
+.idea/*
 *.iml
 *.iws
 /out/
