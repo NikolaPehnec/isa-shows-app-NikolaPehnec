@@ -4,25 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/purple_back"
+    android:background="@color/background"
     tools:context=".LoginActivity">
 
 
     <ImageView
-        android:id="@+id/top_left_il"
-        android:layout_width="139.56dp"
-        android:layout_height="92.13dp"
+        android:id="@+id/topLeftIl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="#00000000"
         android:src="@drawable/ic_top_left_illustration"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/top_right_i"
-        android:layout_width="200.6dp"
-        android:layout_height="264.93dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:id="@+id/topRightIl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="#00000000"
         android:src="@drawable/ic_top_right_illustration"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,13 +30,11 @@
         android:id="@+id/triangle"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
         android:layout_marginStart="60dp"
         android:layout_marginTop="90dp"
         android:background="@drawable/ic_triangle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_left_il" />
+        app:layout_constraintTop_toBottomOf="@+id/topLeftIl" />
 
     <TextView
         android:id="@+id/title"
@@ -53,7 +49,7 @@
         app:layout_constraintTop_toTopOf="@+id/triangle" />
 
     <TextView
-        android:id="@+id/login_title"
+        android:id="@+id/loginTitle"
         style="@style/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -64,14 +60,14 @@
         app:layout_constraintTop_toBottomOf="@+id/triangle" />
 
     <TextView
-        android:id="@+id/login_message"
+        android:id="@+id/loginMessage"
         style="@style/regular"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="@string/login_message"
-        app:layout_constraintStart_toStartOf="@+id/login_title"
-        app:layout_constraintTop_toBottomOf="@+id/login_title" />
+        app:layout_constraintStart_toStartOf="@+id/loginTitle"
+        app:layout_constraintTop_toBottomOf="@+id/loginTitle" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/emailInput"
@@ -85,7 +81,7 @@
         app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_message">
+        app:layout_constraintTop_toBottomOf="@+id/loginMessage">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editEmailInput"
@@ -124,7 +120,8 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/ic_button_gray"
         android:enabled="false"
-        android:hint="Login"
+        android:text="@string/login"
+        android:textAllCaps="false"
         android:textColorHint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

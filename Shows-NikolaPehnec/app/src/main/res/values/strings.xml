@@ -9,4 +9,5 @@
     <string name="title">Shows</string>
     <string name="login_message">In order to continue please log in.</string>
     <string name="welcome_mess">Welcome, %s!</string>
+    <string name="login">Login</string>
 </resources>

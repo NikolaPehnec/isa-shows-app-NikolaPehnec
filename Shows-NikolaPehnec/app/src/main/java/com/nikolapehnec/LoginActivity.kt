@@ -4,13 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Patterns
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.util.PatternsCompat
+import androidx.core.widget.doAfterTextChanged
 import com.nikolapehnec.databinding.ActivityLoginBinding
+import java.util.regex.Pattern
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private var disabledButton: Boolean = true
-    private val emailPattern = Regex("^[^\\s@]+@([^\\s@.,]+\\.)+[^\\s@.,]{2,}\$")
+    private val emailPattern:Pattern = Patterns.EMAIL_ADDRESS
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +29,8 @@ class LoginActivity : AppCompatActivity() {
 
         /*if (intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME) != null && intent.type == "text/plain") {
             val intent2 = Intent()
-            intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)?.let { intent2.setClassName(this, it) }
+            intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)?.let {
+            intent2.setClassName(this, it) }
             startActivity(intent2)
         }*/
     }
@@ -34,6 +40,7 @@ class LoginActivity : AppCompatActivity() {
             startActivity(WelcomeActivity.buildIntent(this, binding.editEmailInput.text.toString()))
         }
 
+        //data ili action
         /*binding.loginButton.setOnClickListener {
             val welcomeActivityIntent = Intent().apply {
                 action = Intent.ACTION_SEND
@@ -44,64 +51,47 @@ class LoginActivity : AppCompatActivity() {
         }*/
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        intent?.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
-    }
-
     private fun initListeners() {
-        binding.editEmailInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                if (disabledButton && binding.editEmailInput.text.toString()
-                        .matches(emailPattern) && binding.editPasswordInput.text.toString()
+        binding.editEmailInput.doAfterTextChanged {
+                if (disabledButton && emailPattern.matcher(binding.editEmailInput.text.toString()).matches()
+                    && binding.editPasswordInput.text.toString()
                         .trim().length > 5
                 ) {
                     binding.loginButton.setBackgroundResource(R.drawable.ic_button_white)
-                    binding.loginButton.setHintTextColor(resources.getColor(R.color.background))
+                    binding.loginButton.setTextColor(ContextCompat.getColor(this,R.color.background))
                     binding.loginButton.isEnabled = true
                     disabledButton = false
                     binding.emailInput.error = null
-                } else if (!disabledButton && !binding.editEmailInput.text.toString()
-                        .matches(emailPattern)
+                } else if (!disabledButton && !emailPattern.matcher(binding.editEmailInput.text.toString()).matches()
                 ) {
                     binding.loginButton.setBackgroundResource(R.drawable.ic_button_gray)
-                    binding.loginButton.setHintTextColor(resources.getColor(R.color.white))
+                    binding.loginButton.setTextColor(ContextCompat.getColor(this,R.color.white))
                     binding.loginButton.isEnabled = false
                     disabledButton = true
                 }
-                if (!binding.editEmailInput.text.toString().matches(emailPattern)) {
+                if (!emailPattern.matcher(binding.editEmailInput.text.toString()).matches()) {
                     binding.emailInput.error = "Invalid email"
                 } else {
                     binding.emailInput.error = null
                 }
             }
-        })
 
-        binding.editPasswordInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
+        binding.editPasswordInput.doAfterTextChanged {
                 if (disabledButton && binding.editPasswordInput.text.toString()
-                        .trim().length > 5 && binding.editEmailInput.text.toString()
-                        .matches(emailPattern)
+                        .trim().length > 5 && emailPattern.matcher(binding.editEmailInput.text.toString()).matches()
                 ) {
                     binding.loginButton.setBackgroundResource(R.drawable.ic_button_white)
-                    binding.loginButton.setHintTextColor(resources.getColor(R.color.background))
+                    binding.loginButton.setTextColor(ContextCompat.getColor(this,R.color.background))
                     binding.loginButton.isEnabled = true
                     disabledButton = false
                 } else if (binding.editPasswordInput.text.toString().trim().length < 6) {
                     binding.loginButton.setBackgroundResource(R.drawable.ic_button_gray)
-                    binding.loginButton.setHintTextColor(resources.getColor(R.color.white))
+                    binding.loginButton.setTextColor(ContextCompat.getColor(this,R.color.white))
                     binding.loginButton.isEnabled = false
                     disabledButton = true
                 }
             }
-        })
+
     }
 }
