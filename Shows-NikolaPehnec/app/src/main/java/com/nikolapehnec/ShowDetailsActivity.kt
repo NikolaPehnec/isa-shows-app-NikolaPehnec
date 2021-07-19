@@ -86,6 +86,8 @@ class ShowDetailsActivity : AppCompatActivity() {
         val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
 
+        dialogBinding.editReviewInput.requestFocus()
+
         val sharedPref = applicationContext.getSharedPreferences("1", Context.MODE_PRIVATE)
         val username = sharedPref.getString(getString(R.string.username), "")
 
