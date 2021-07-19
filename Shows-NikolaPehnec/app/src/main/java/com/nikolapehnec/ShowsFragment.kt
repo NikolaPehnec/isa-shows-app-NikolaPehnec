@@ -2,12 +2,16 @@ package com.nikolapehnec
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nikolapehnec.databinding.ActivityShowsBinding
 import com.nikolapehnec.model.Show
 
-class ShowsActivity : AppCompatActivity() {
+class ShowsFragment : Fragment() {
 
     object ShowsResource {
         val shows = listOf(
@@ -42,11 +46,27 @@ class ShowsActivity : AppCompatActivity() {
         )
     }
 
-    private lateinit var binding: ActivityShowsBinding
+    private var _binding: ActivityShowsBinding? = null
+    private val binding get() = _binding!!
 
     private var adapter: ShowsAdapter? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = ActivityShowsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initRecyclerView()
+        initListeners()
+    }
+
+    /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityShowsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -55,15 +75,16 @@ class ShowsActivity : AppCompatActivity() {
         initRecyclerView()
         initListeners()
     }
-
+*/
     private fun initRecyclerView() {
         binding.showsRecycler.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
         adapter = ShowsAdapter(ShowsResource.shows) { id ->
             run {
-                val intent = ShowDetailsActivity.buildIntent(id, this)
-                startActivity(intent)
+                ShowsFragmentDirections.actionShowToDetail(id.toInt()).also { action ->
+                    findNavController().navigate(action)
+                }
             }
         }
 
@@ -83,6 +104,10 @@ class ShowsActivity : AppCompatActivity() {
                 binding.noShowsLayout.visibility = View.GONE
                 binding.hideShowsButton.text = getString(R.string.hideShows)
             }
+        }
+
+        binding.logoutButton.setOnClickListener {
+            findNavController().navigate(R.id.actionLogout)
         }
 
     }

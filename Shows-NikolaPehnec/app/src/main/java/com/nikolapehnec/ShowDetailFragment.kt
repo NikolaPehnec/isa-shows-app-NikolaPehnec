@@ -1,29 +1,32 @@
 package com.nikolapehnec
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowDetailsBinding
-import com.nikolapehnec.databinding.ActivityShowsBinding
 import com.nikolapehnec.databinding.DialogAddReviewBinding
-import com.nikolapehnec.databinding.ItemReviewBinding
 import com.nikolapehnec.model.Review
 import com.nikolapehnec.model.Show
 
-class ShowDetailsActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityShowDetailsBinding
+class ShowDetailFragment : Fragment() {
+
+    private var _binding: ActivityShowDetailsBinding? = null
+    private val binding get() = _binding!!
+
+    val args: ShowDetailFragmentArgs by navArgs()
 
     private var adapter: ReviewsAdapter? = null
     private var showId: Int = 0
 
-    companion object {
+    /*companion object {
         private const val EXTRA_SHOWID = "EXTRA_SHOWID"
 
         fun buildIntent(showId: String, context: Activity): Intent {
@@ -31,9 +34,28 @@ class ShowDetailsActivity : AppCompatActivity() {
             intent.putExtra(EXTRA_SHOWID, showId)
             return intent
         }
+    }*/
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = ActivityShowDetailsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        showId = args.showId - 1
+
+        loadUI()
+        initRecyclerView()
+        initListeners()
+    }
+
+    /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityShowDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -44,10 +66,10 @@ class ShowDetailsActivity : AppCompatActivity() {
         loadUI()
         initRecyclerView()
         initListeners()
-    }
+    }*/
 
     private fun loadUI() {
-        val show = ShowsActivity.ShowsResource.shows[showId]
+        val show = ShowsFragment.ShowsResource.shows[showId]
         binding.showName.text = show.name
         binding.longDescription.text = show.longDescription
         binding.showImage.setImageResource(show.imageResourceId)
@@ -58,7 +80,7 @@ class ShowDetailsActivity : AppCompatActivity() {
 
     private fun initListeners() {
         binding.toolbar.setOnClickListener {
-            onBackPressed()
+            findNavController().navigate(R.id.actionDetailToShow)
         }
 
         binding.newReviewButton.setOnClickListener {
@@ -68,9 +90,9 @@ class ShowDetailsActivity : AppCompatActivity() {
 
     private fun initRecyclerView() {
         binding.reviewsRecyclerView.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        val show = ShowsActivity.ShowsResource.shows[showId]
+        val show = ShowsFragment.ShowsResource.shows[showId]
 
         adapter = ReviewsAdapter(show.reviews)
         binding.reviewsRecyclerView.adapter = adapter
@@ -82,20 +104,21 @@ class ShowDetailsActivity : AppCompatActivity() {
     }
 
     private fun showBottomSheet() {
-        val dialog = BottomSheetDialog(this)
+        val dialog = BottomSheetDialog(requireContext())
         val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
 
         dialogBinding.editReviewInput.requestFocus()
 
-        val sharedPref = applicationContext.getSharedPreferences("1", Context.MODE_PRIVATE)
-        val username = sharedPref.getString(getString(R.string.username), "")
+        val sharedPref =
+            activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+        val username = sharedPref?.getString(getString(R.string.username), "")
 
         dialogBinding.submitButton.setOnClickListener {
             if (dialogBinding.ratingBarReview.rating.compareTo(0.0) == 0) {
-                Toast.makeText(this, "Rating is mandatory!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Rating is mandatory!", Toast.LENGTH_SHORT).show()
             } else {
-                val show = ShowsActivity.ShowsResource.shows[showId]
+                val show = ShowsFragment.ShowsResource.shows[showId]
                 show.addReview(
                     Review(
                         username.toString(),

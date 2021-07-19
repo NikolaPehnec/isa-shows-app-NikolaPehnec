@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    app:startDestination="@id/login">
+
+    <fragment
+        android:id="@+id/login"
+        android:name="com.nikolapehnec.LoginFragment"
+        tools:layout="@layout/activity_login">
+
+        <action
+            android:id="@+id/actionLoginToShows"
+            app:destination="@id/shows"
+            app:popUpTo="@id/shows"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/shows"
+        android:name="com.nikolapehnec.ShowsFragment"
+        tools:layout="@layout/activity_shows">
+
+        <action
+            android:id="@+id/actionShowToDetail"
+            app:destination="@id/showDetail" />
+
+        <action
+            android:id="@+id/actionLogout"
+            app:destination="@id/login"
+            app:popUpTo="@id/shows"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/showDetail"
+        android:name="com.nikolapehnec.ShowDetailFragment"
+        tools:layout="@layout/activity_show_details">
+
+        <argument
+            android:name="showId"
+            app:argType="integer" />
+
+        <action
+            android:id="@+id/actionDetailToShow"
+            app:destination="@id/shows"
+            app:popUpTo="@id/shows"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+</navigation>
