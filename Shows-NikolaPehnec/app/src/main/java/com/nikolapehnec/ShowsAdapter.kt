@@ -38,6 +38,10 @@ class ShowsAdapter(
             binding.showName.text = item.name
             binding.showDescription.text = item.description
             binding.showImage.setImageResource(item.imageResourceId)
+
+            binding.root.setOnClickListener {
+                onClickCallback(item.id)
+            }
         }
     }
 

@@ -14,4 +14,12 @@
     <string name="noShowsMessage">Your shows are not showing. Get it?</string>
     <string name="showShows">Show shows</string>
     <string name="hideShows">Hide shows</string>
+    <string name="reviews">Reviews</string>
+    <string name="noReviews">No reviews yet.</string>
+    <string name="writeReview">Write a review</string>
+    <string name="newReview">Write a review</string>
+    <string name="comment">Comment</string>
+    <string name="submit">Submit</string>
+    <string name="username">username</string>
+    <string name="averageGrade">%d REVIEWS, %.2f AVERAGE</string>
 </resources>
