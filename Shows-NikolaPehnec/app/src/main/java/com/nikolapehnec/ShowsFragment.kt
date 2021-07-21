@@ -1,11 +1,15 @@
 package com.nikolapehnec
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Layout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavAction
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nikolapehnec.databinding.ActivityShowsBinding
@@ -62,8 +66,16 @@ class ShowsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initRecyclerView()
-        initListeners()
+
+        val isTablet=context?.resources?.getBoolean(R.bool.isTablet)
+        if(isTablet == true){
+            initTabletRecyclerView()
+            initListeners()
+        } else{
+            initRecyclerView()
+            initListeners()
+        }
+
     }
 
     /*override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +89,7 @@ class ShowsFragment : Fragment() {
     }
 */
     private fun initRecyclerView() {
-        binding.showsRecycler.layoutManager =
+        binding.showsRecycler?.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
         adapter = ShowsAdapter(ShowsResource.shows) { id ->
@@ -88,25 +100,53 @@ class ShowsFragment : Fragment() {
             }
         }
 
-        binding.showsRecycler.adapter = adapter
+        binding.showsRecycler?.adapter = adapter
     }
 
-    private fun initListeners() {
-        binding.hideShowsButton.setOnClickListener {
-            if (adapter?.itemCount?.compareTo(0) != 0) {
-                adapter?.setItems(listOf())
-                binding.showsRecycler.visibility = View.GONE
-                binding.noShowsLayout.visibility = View.VISIBLE
-                binding.hideShowsButton.text = getString(R.string.showShows)
-            } else {
-                adapter?.setItems(ShowsResource.shows)
-                binding.showsRecycler.visibility = View.VISIBLE
-                binding.noShowsLayout.visibility = View.GONE
-                binding.hideShowsButton.text = getString(R.string.hideShows)
+    private fun initTabletRecyclerView(){
+        val navHostFragment = childFragmentManager.findFragmentById(R.id.detailShowFragmentContainer) as NavHostFragment
+        navHostFragment.navController.navigate(R.id.showDetail)
+
+        binding.showsRecycler?.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+
+        adapter = ShowsAdapter(ShowsResource.shows) { id ->
+            run {
+                val sharedPref =
+                    activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+                with(sharedPref?.edit()) {
+                    this?.putString(
+                        getString(R.string.showID),
+                        id
+                    )
+                    this?.apply()
+                }
+
+                navHostFragment.navController.navigate(R.id.showDetail)
+
             }
         }
 
-        binding.logoutButton.setOnClickListener {
+        binding.showsRecycler?.adapter = adapter
+    }
+
+
+    private fun initListeners() {
+        binding.hideShowsButton?.setOnClickListener {
+            if (adapter?.itemCount?.compareTo(0) != 0) {
+                adapter?.setItems(listOf())
+                binding.showsRecycler?.visibility = View.GONE
+                binding.noShowsLayout?.visibility = View.VISIBLE
+                binding.hideShowsButton?.text = getString(R.string.showShows)
+            } else {
+                adapter?.setItems(ShowsResource.shows)
+                binding.showsRecycler?.visibility = View.VISIBLE
+                binding.noShowsLayout?.visibility = View.GONE
+                binding.hideShowsButton?.text = getString(R.string.hideShows)
+            }
+        }
+
+        binding.logoutButton?.setOnClickListener {
             findNavController().navigate(R.id.actionLogout)
         }
 

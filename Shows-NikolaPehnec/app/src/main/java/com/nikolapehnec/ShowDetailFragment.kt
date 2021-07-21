@@ -48,11 +48,28 @@ class ShowDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        showId = args.showId - 1
+
+        try {
+            showId = args.showId-1
+        } catch (e: Exception) {
+            showId = 0
+        }
+
+        val sharedPref =
+            activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+        val showIdPref = sharedPref?.getString(getString(R.string.showID), "-1")
+        if (showIdPref !=null && showIdPref!= "-1") {
+            showId = showIdPref.toInt() - 1
+            removeAppBar()
+        }
 
         loadUI()
         initRecyclerView()
         initListeners()
+    }
+
+    private fun removeAppBar(){
+        binding.toolbar.visibility=View.GONE
     }
 
     /*override fun onCreate(savedInstanceState: Bundle?) {
