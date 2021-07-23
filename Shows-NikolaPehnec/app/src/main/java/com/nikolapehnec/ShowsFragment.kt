@@ -1,19 +1,25 @@
 package com.nikolapehnec
 
+import android.content.ContentValues
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.text.Layout
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavAction
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowsBinding
+import com.nikolapehnec.databinding.DialogAddReviewBinding
 import com.nikolapehnec.model.Show
+
 
 class ShowsFragment : Fragment() {
 
@@ -52,7 +58,7 @@ class ShowsFragment : Fragment() {
 
     private var _binding: ActivityShowsBinding? = null
     private val binding get() = _binding!!
-
+    private var sharedPref: SharedPreferences? = null
     private var adapter: ShowsAdapter? = null
 
     override fun onCreateView(
@@ -61,22 +67,27 @@ class ShowsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = ActivityShowsBinding.inflate(inflater, container, false)
+        sharedPref = activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val isTablet=context?.resources?.getBoolean(R.bool.isTablet)
-        if(isTablet == true){
-            initTabletRecyclerView()
-            initListeners()
-        } else{
-            initRecyclerView()
-            initListeners()
+        val fm: FragmentManager? = fragmentManager
+        for (entry in 0 until fm!!.getBackStackEntryCount()) {
+            Log.i(ContentValues.TAG, "Found fragment: " + fm.getBackStackEntryAt(entry).getId())
         }
 
+        val isTablet = context?.resources?.getBoolean(R.bool.isTablet)
+        if (isTablet == true) {
+            initTabletRecyclerView()
+        } else {
+            initRecyclerView()
+        }
+
+        initListeners()
     }
+
 
     /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +100,7 @@ class ShowsFragment : Fragment() {
     }
 */
     private fun initRecyclerView() {
-        binding.showsRecycler?.layoutManager =
+        binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
         adapter = ShowsAdapter(ShowsResource.shows) { id ->
@@ -100,20 +111,19 @@ class ShowsFragment : Fragment() {
             }
         }
 
-        binding.showsRecycler?.adapter = adapter
+        binding.showsRecycler.adapter = adapter
     }
 
-    private fun initTabletRecyclerView(){
-        val navHostFragment = childFragmentManager.findFragmentById(R.id.detailShowFragmentContainer) as NavHostFragment
+    private fun initTabletRecyclerView() {
+        val navHostFragment =
+            childFragmentManager.findFragmentById(R.id.detailShowFragmentContainer) as NavHostFragment
         navHostFragment.navController.navigate(R.id.showDetail)
 
-        binding.showsRecycler?.layoutManager =
+        binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
         adapter = ShowsAdapter(ShowsResource.shows) { id ->
             run {
-                val sharedPref =
-                    activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
                 with(sharedPref?.edit()) {
                     this?.putString(
                         getString(R.string.showID),
@@ -127,7 +137,7 @@ class ShowsFragment : Fragment() {
             }
         }
 
-        binding.showsRecycler?.adapter = adapter
+        binding.showsRecycler.adapter = adapter
     }
 
 
@@ -135,20 +145,34 @@ class ShowsFragment : Fragment() {
         binding.hideShowsButton?.setOnClickListener {
             if (adapter?.itemCount?.compareTo(0) != 0) {
                 adapter?.setItems(listOf())
-                binding.showsRecycler?.visibility = View.GONE
-                binding.noShowsLayout?.visibility = View.VISIBLE
+                binding.showsRecycler.visibility = View.GONE
+                binding.noShowsLayout.visibility = View.VISIBLE
                 binding.hideShowsButton?.text = getString(R.string.showShows)
             } else {
                 adapter?.setItems(ShowsResource.shows)
-                binding.showsRecycler?.visibility = View.VISIBLE
-                binding.noShowsLayout?.visibility = View.GONE
+                binding.showsRecycler.visibility = View.VISIBLE
+                binding.noShowsLayout.visibility = View.GONE
                 binding.hideShowsButton?.text = getString(R.string.hideShows)
             }
         }
 
-        binding.logoutButton?.setOnClickListener {
+        /*binding.logoutButton?.setOnClickListener {
+            val sharedPref =
+                activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+            with(sharedPref?.edit()) {
+                this?.putBoolean(getString(R.string.remember_me), false)
+                this?.apply()
+            }
             findNavController().navigate(R.id.actionLogout)
+        }*/
+        binding.profilePicture?.setOnClickListener {
+            showBottomSheet()
         }
+    }
 
+    private fun showBottomSheet(){
+        val dialog = BottomSheetDialog(requireContext())
+        val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
+        dialog.setContentView(dialogBinding.root)
     }
 }

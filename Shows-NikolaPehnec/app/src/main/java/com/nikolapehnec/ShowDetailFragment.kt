@@ -1,12 +1,15 @@
 package com.nikolapehnec
 
+import android.content.ContentValues
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,10 +50,13 @@ class ShowDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        val fm: FragmentManager? = fragmentManager
+        for (entry in 0 until fm!!.getBackStackEntryCount()) {
+            Log.i(ContentValues.TAG, "Found fragment: " + fm.getBackStackEntryAt(entry).toString())
+        }
 
         try {
-            showId = args.showId-1
+            showId = args.showId - 1
         } catch (e: Exception) {
             showId = 0
         }
@@ -58,7 +64,7 @@ class ShowDetailFragment : Fragment() {
         val sharedPref =
             activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
         val showIdPref = sharedPref?.getString(getString(R.string.showID), "-1")
-        if (showIdPref !=null && showIdPref!= "-1") {
+        if (showIdPref != null && showIdPref != "-1") {
             showId = showIdPref.toInt() - 1
             removeAppBar()
         }
@@ -68,8 +74,8 @@ class ShowDetailFragment : Fragment() {
         initListeners()
     }
 
-    private fun removeAppBar(){
-        binding.toolbar.visibility=View.GONE
+    private fun removeAppBar() {
+        binding.toolbar.visibility = View.GONE
     }
 
     /*override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +93,9 @@ class ShowDetailFragment : Fragment() {
 
     private fun loadUI() {
         val show = ShowsFragment.ShowsResource.shows[showId]
-        binding.showName.text = show.name
+        //binding.showName.text = show.name
+
+        binding.showName.text=show.name
         binding.longDescription.text = show.longDescription
         binding.showImage.setImageResource(show.imageResourceId)
 
@@ -96,8 +104,15 @@ class ShowDetailFragment : Fragment() {
     }
 
     private fun initListeners() {
-        binding.toolbar.setOnClickListener {
-            findNavController().navigate(R.id.actionDetailToShow)
+
+        //listener na sliku
+        binding.toolbar.setNavigationOnClickListener {
+
+            //Finish fragment, pop -> showsFragment
+            //findNavController().navigateUp()
+
+            //Isto pop, ako nema nista na backstacku finish
+            activity?.onBackPressed()
         }
 
         binding.newReviewButton.setOnClickListener {

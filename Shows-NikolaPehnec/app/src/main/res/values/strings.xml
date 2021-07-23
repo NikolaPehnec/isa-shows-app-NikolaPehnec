@@ -23,4 +23,7 @@
     <string name="username">username</string>
     <string name="averageGrade">%d REVIEWS, %.2f AVERAGE</string>
     <string name="showID">showId</string>
+    <string name="remember_me">Remember me</string>
+    <string name="change_profile_photo">Change profile photo</string>
+    <string name="logout">Logout</string>
 </resources>

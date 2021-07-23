@@ -7,12 +7,25 @@
     android:orientation="vertical"
     tools:context=".ShowsFragment">
 
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize">
+
+        <ImageView
+            android:id="@+id/profilePicture"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="end"
+            android:layout_margin="20dp"
+            android:src="@drawable/ic_profile_placeholder" />
+    </androidx.appcompat.widget.Toolbar>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingTop="20dp"
+        android:paddingStart="10dp"
+        android:paddingTop="10dp"
         android:paddingBottom="20dp">
 
         <TextView
@@ -20,17 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
-            android:layout_marginTop="8dp"
             android:text="@string/shows" />
-
-        <ImageView
-            android:id="@+id/logoutButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:scaleType="fitEnd"
-            android:src="@drawable/ic_logout_button" />
-
 
         <Button
             android:id="@+id/hideShowsButton"
