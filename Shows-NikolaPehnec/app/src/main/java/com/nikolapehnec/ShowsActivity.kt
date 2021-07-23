@@ -12,7 +12,7 @@ class ShowsActivity : AppCompatActivity() {
     object ShowsResource {
         val shows = listOf(
             Show(
-                "1",
+                "0",
                 "The office",
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
                 "The Office is an American mockumentary sitcom television series that depicts the everyday" +
@@ -21,7 +21,7 @@ class ShowsActivity : AppCompatActivity() {
                 listOf(), R.drawable.ic_office,
             ),
             Show(
-                "2",
+                "1",
                 "Stranger things",
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
                 "Stranger Things is an American science fiction horror drama television series created by the Duffer Brothers and " +
@@ -30,7 +30,7 @@ class ShowsActivity : AppCompatActivity() {
                 R.drawable.ic_stranger_things
             ),
             Show(
-                "3",
+                "2",
                 "Krv nije voda",
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
                 "Krv nije voda je hrvatska televizijska serija snimana od 2011. do 2013. godine.Serija je nadahnuta svakodnevnim životnim " +

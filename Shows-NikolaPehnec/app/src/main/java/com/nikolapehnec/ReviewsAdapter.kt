@@ -4,16 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.nikolapehnec.databinding.ItemReviewBinding
-import com.nikolapehnec.databinding.ViewShowItemBinding
 import com.nikolapehnec.model.Review
-import com.nikolapehnec.model.Show
 
 class ReviewsAdapter(
     private var items: List<Review>
 ) : RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
-        var binding = ItemReviewBinding.inflate(LayoutInflater.from(parent.context))
+        var binding = ItemReviewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
 
         return ReviewViewHolder(binding)
     }
@@ -26,9 +24,9 @@ class ReviewsAdapter(
         return items.size
     }
 
-    fun setNewReviews(reviews: List<Review>) {
-        items =reviews
-        notifyDataSetChanged()
+    fun reviewAdded(review: Review) {
+        items += review
+        notifyItemInserted(items.lastIndex)
     }
 
 
@@ -37,7 +35,7 @@ class ReviewsAdapter(
 
         fun bind(item: Review) {
             binding.reviewImage.setImageResource(item.imageResourceId)
-            binding.reviewText.text=item.text
+            binding.reviewText.text = item.text
             binding.reviewUsername.text = item.user
             binding.reviewGrade.text = item.grade.toString()
         }

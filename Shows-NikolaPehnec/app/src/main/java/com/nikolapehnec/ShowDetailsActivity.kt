@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowDetailsBinding
@@ -39,7 +40,7 @@ class ShowDetailsActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
 
-        showId = intent.extras?.get(EXTRA_SHOWID).toString().toInt() - 1
+        showId = intent.extras?.get(EXTRA_SHOWID).toString().toInt()
 
         loadUI()
         initRecyclerView()
@@ -53,7 +54,6 @@ class ShowDetailsActivity : AppCompatActivity() {
         binding.showImage.setImageResource(show.imageResourceId)
 
         calculateAverageGrade(show)
-        calculateRecyclerSize(show)
     }
 
     private fun initListeners() {
@@ -76,8 +76,8 @@ class ShowDetailsActivity : AppCompatActivity() {
         binding.reviewsRecyclerView.adapter = adapter
 
         if (adapter?.itemCount?.compareTo(0) == 0) {
-            binding.reviewsVisible.visibility = View.GONE
-            binding.reviewsInvisible.visibility = View.VISIBLE
+            binding.reviewsVisible.isVisible=false
+            binding.reviewsInvisible.isVisible = true
         }
     }
 
@@ -93,22 +93,19 @@ class ShowDetailsActivity : AppCompatActivity() {
 
         dialogBinding.submitButton.setOnClickListener {
             if (dialogBinding.ratingBarReview.rating.compareTo(0.0) == 0) {
-                Toast.makeText(this, "Rating is mandatory!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.mandatoryRating), Toast.LENGTH_SHORT).show()
             } else {
                 val show = ShowsActivity.ShowsResource.shows[showId]
-                show.addReview(
-                    Review(
+                val review:Review= Review(
                         username.toString(),
                         dialogBinding.editReviewInput.text.toString(),
                         dialogBinding.ratingBarReview.rating.toInt(),
-                        R.drawable.ic_profile_placeholder
-                    )
-                )
+                        R.drawable.ic_profile_placeholder)
 
-                adapter?.setNewReviews(show.reviews)
+                show.reviews+=review
+                adapter?.reviewAdded(review)
 
                 calculateAverageGrade(show)
-                calculateRecyclerSize(show)
 
                 dialog.dismiss()
 
@@ -136,11 +133,4 @@ class ShowDetailsActivity : AppCompatActivity() {
         binding.ratingBar.rating = average
     }
 
-    private fun calculateRecyclerSize(show: Show) {
-        if (show.reviews.size == 2) {
-            binding.reviewsRecyclerView.layoutParams.height = 400
-        } else if (show.reviews.size >= 3 && binding.reviewsRecyclerView.layoutParams.height != 700) {
-            binding.reviewsRecyclerView.layoutParams.height = 700
-        }
-    }
 }

@@ -23,8 +23,8 @@
             <ImageView
                 android:id="@+id/showImage"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scaleType="fitXY"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
                 tools:src="@drawable/krv_nije_voda_1" />
 
             <TextView

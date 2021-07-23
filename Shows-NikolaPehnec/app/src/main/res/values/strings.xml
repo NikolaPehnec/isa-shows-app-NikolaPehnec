@@ -22,4 +22,5 @@
     <string name="submit">Submit</string>
     <string name="username">username</string>
     <string name="averageGrade">%d REVIEWS, %.2f AVERAGE</string>
+    <string name="mandatoryRating">Rating is mandatory!</string>
 </resources>

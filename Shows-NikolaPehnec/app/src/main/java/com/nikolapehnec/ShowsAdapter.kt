@@ -12,7 +12,8 @@ class ShowsAdapter(
 ) : RecyclerView.Adapter<ShowsAdapter.ShowViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShowViewHolder {
-        var binding = ViewShowItemBinding.inflate(LayoutInflater.from(parent.context))
+        var binding =
+            ViewShowItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
 
         return ShowViewHolder(binding)
     }
