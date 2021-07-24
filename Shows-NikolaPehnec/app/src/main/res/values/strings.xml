@@ -26,4 +26,10 @@
     <string name="remember_me">Remember me</string>
     <string name="change_profile_photo">Change profile photo</string>
     <string name="logout">Logout</string>
+    <string name="logoutMessage">Are you sure you want to logout?</string>
+    <string name="notification">Notification</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="noPermission">Please check your permission in settings</string>
+    <string name="settings">Settings</string>
 </resources>

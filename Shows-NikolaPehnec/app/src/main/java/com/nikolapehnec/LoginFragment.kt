@@ -50,8 +50,6 @@ class LoginFragment : Fragment() {
         initListeners()
 
         checkIfSignedIn()
-
-
     }
 
     private fun checkIfSignedIn(){

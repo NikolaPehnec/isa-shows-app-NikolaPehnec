@@ -11,13 +11,16 @@
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/profilePicture"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_gravity="end"
             android:layout_margin="20dp"
-            android:src="@drawable/ic_profile_placeholder" />
+            android:padding="1dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_profile_placeholder"
+            app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
     </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout

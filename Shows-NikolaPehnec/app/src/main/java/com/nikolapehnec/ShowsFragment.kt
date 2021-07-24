@@ -1,24 +1,25 @@
 package com.nikolapehnec
 
-import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowsBinding
-import com.nikolapehnec.databinding.DialogAddReviewBinding
+import com.nikolapehnec.databinding.DialogShowsMenuBinding
 import com.nikolapehnec.model.Show
+import java.io.File
 
 
 class ShowsFragment : Fragment() {
@@ -58,8 +59,33 @@ class ShowsFragment : Fragment() {
 
     private var _binding: ActivityShowsBinding? = null
     private val binding get() = _binding!!
+    private var _dialogBinding: DialogShowsMenuBinding? = null
+    private val dialogBinding get() = _dialogBinding!!
     private var sharedPref: SharedPreferences? = null
     private var adapter: ShowsAdapter? = null
+    private var profileImage: File? = null
+
+    private val cameraPermissionForProfilePicture =
+        preparePermissionsContract(onPermissionsGranted = {
+            val imageFile: File? = FileUtil.createImageFile(requireContext())
+
+            val avatarUri: Uri? = imageFile?.let { file ->
+                FileProvider.getUriForFile(
+                    requireContext(),
+                    activity?.applicationContext?.packageName.toString() + ".fileprovider",
+                    file
+                )
+            }
+
+            cameraContract.launch(avatarUri)
+        })
+
+    private val cameraContract = prepareCameraContract(onSuccess = {
+        profileImage = FileUtil.getImageFile(requireContext())
+
+        dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+    })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,10 +99,6 @@ class ShowsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val fm: FragmentManager? = fragmentManager
-        for (entry in 0 until fm!!.getBackStackEntryCount()) {
-            Log.i(ContentValues.TAG, "Found fragment: " + fm.getBackStackEntryAt(entry).getId())
-        }
 
         val isTablet = context?.resources?.getBoolean(R.bool.isTablet)
         if (isTablet == true) {
@@ -86,19 +108,15 @@ class ShowsFragment : Fragment() {
         }
 
         initListeners()
+        populateUI()
     }
 
-
-    /*override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityShowsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        supportActionBar?.hide()
-
-        initRecyclerView()
-        initListeners()
+    private fun populateUI() {
+        if (profileImage != null) {
+            binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        }
     }
-*/
+
     private fun initRecyclerView() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -133,7 +151,6 @@ class ShowsFragment : Fragment() {
                 }
 
                 navHostFragment.navController.navigate(R.id.showDetail)
-
             }
         }
 
@@ -145,34 +162,62 @@ class ShowsFragment : Fragment() {
         binding.hideShowsButton?.setOnClickListener {
             if (adapter?.itemCount?.compareTo(0) != 0) {
                 adapter?.setItems(listOf())
-                binding.showsRecycler.visibility = View.GONE
-                binding.noShowsLayout.visibility = View.VISIBLE
+                binding.showsRecycler.isVisible = false
+                binding.noShowsLayout.isVisible = true
                 binding.hideShowsButton?.text = getString(R.string.showShows)
             } else {
                 adapter?.setItems(ShowsResource.shows)
-                binding.showsRecycler.visibility = View.VISIBLE
-                binding.noShowsLayout.visibility = View.GONE
+                binding.showsRecycler.isVisible = true
+                binding.noShowsLayout.isVisible = false
                 binding.hideShowsButton?.text = getString(R.string.hideShows)
             }
         }
 
-        /*binding.logoutButton?.setOnClickListener {
-            val sharedPref =
-                activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
-            with(sharedPref?.edit()) {
-                this?.putBoolean(getString(R.string.remember_me), false)
-                this?.apply()
-            }
-            findNavController().navigate(R.id.actionLogout)
-        }*/
         binding.profilePicture?.setOnClickListener {
             showBottomSheet()
         }
     }
 
-    private fun showBottomSheet(){
+    private fun showBottomSheet() {
         val dialog = BottomSheetDialog(requireContext())
-        val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
+        _dialogBinding = DialogShowsMenuBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
+        dialogBinding.userEmail.text = sharedPref?.getString(getString(R.string.username), "")
+        if (profileImage != null) {
+            dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        }
+
+        initBottomSheetListeners(dialogBinding, dialog)
+        dialog.show()
+    }
+
+    private fun initBottomSheetListeners(
+        dialogBinding: DialogShowsMenuBinding,
+        bottomSheetDialog: BottomSheetDialog
+    ) {
+        dialogBinding.logoutButton.setOnClickListener {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle(getString(R.string.notification))
+            builder.setMessage(getString(R.string.logoutMessage))
+
+            builder.setPositiveButton(getString(R.string.yes)) { _, _ ->
+                with(sharedPref?.edit()) {
+                    this?.putBoolean(getString(R.string.remember_me), false)
+                    this?.apply()
+
+                    bottomSheetDialog.dismiss()
+                    findNavController().navigate(R.id.actionLogout)
+                }
+            }
+            builder.setNegativeButton(getString(R.string.no)) { dialog, _ ->
+                dialog.dismiss()
+            }
+
+            builder.show()
+        }
+
+        dialogBinding.changeProfilePhotoButton.setOnClickListener {
+            cameraPermissionForProfilePicture.launch(arrayOf(android.Manifest.permission.CAMERA))
+        }
     }
 }
