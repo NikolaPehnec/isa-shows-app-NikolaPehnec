@@ -65,6 +65,7 @@ class ShowsFragment : Fragment() {
     private var adapter: ShowsAdapter? = null
     private var profileImage: File? = null
 
+    // KOD ON CREATEA POGLEDAJ U FAJLU DAL POSTOJI VEC
     private val cameraPermissionForProfilePicture =
         preparePermissionsContract(onPermissionsGranted = {
             val imageFile: File? = FileUtil.createImageFile(requireContext())
@@ -112,7 +113,8 @@ class ShowsFragment : Fragment() {
     }
 
     private fun populateUI() {
-        if (profileImage != null) {
+        if (FileUtil.getImageFile(requireContext()) != null) {
+            profileImage = FileUtil.getImageFile(requireContext())
             binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
         }
     }
@@ -183,7 +185,9 @@ class ShowsFragment : Fragment() {
         _dialogBinding = DialogShowsMenuBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
         dialogBinding.userEmail.text = sharedPref?.getString(getString(R.string.username), "")
-        if (profileImage != null) {
+
+        if (FileUtil.getImageFile(requireContext()) != null) {
+            profileImage = FileUtil.getImageFile(requireContext())
             dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
         }
 
