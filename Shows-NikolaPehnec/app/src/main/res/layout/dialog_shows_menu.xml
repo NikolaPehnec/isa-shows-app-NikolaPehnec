@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/profilePicture"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/ic_profile_placeholder"
+        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+        app:strokeColor="@color/background"
+        android:padding="4dp"
+        app:strokeWidth="4dp" />
+
+    <TextView
+        android:id="@+id/userEmail"
+        style="@style/subtitleBlack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:breakStrategy="simple"
+        android:textAlignment="center"
+        tools:text="imenko.prezimenovic@hotmail.com" />
+
+
+    <android.widget.Button
+        android:id="@+id/changeProfilePhotoButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/ic_rectangle"
+        android:text="@string/change_profile_photo"
+        android:textAllCaps="false"
+        android:textColor="@color/background" />
+
+    <android.widget.Button
+        android:id="@+id/logoutButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/ic_button_purple"
+        android:text="@string/logout"
+        android:textAllCaps="false"
+        android:textColor="@color/white" />
+
+</LinearLayout>

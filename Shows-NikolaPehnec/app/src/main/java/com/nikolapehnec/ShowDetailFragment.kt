@@ -7,8 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowDetailsBinding
@@ -21,20 +20,12 @@ class ShowDetailFragment : Fragment() {
     private var _binding: ActivityShowDetailsBinding? = null
     private val binding get() = _binding!!
 
-    val args: ShowDetailFragmentArgs by navArgs()
+    //val args: ShowDetailFragmentArgs by navArgs()
 
     private var adapter: ReviewsAdapter? = null
-    private var showId: Int = 0
+    private var showId: Int? = 0
+    private val detailViewModel: ShowsDetailsViewModel by viewModels()
 
-    /*companion object {
-        private const val EXTRA_SHOWID = "EXTRA_SHOWID"
-
-        fun buildIntent(showId: String, context: Activity): Intent {
-            val intent = Intent(context, ShowDetailsActivity::class.java)
-            intent.putExtra(EXTRA_SHOWID, showId)
-            return intent
-        }
-    }*/
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,55 +40,53 @@ class ShowDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
-        try {
-            showId = args.showId-1
-        } catch (e: Exception) {
-            showId = 0
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            "showId",
+            viewLifecycleOwner
+        ) { key, result ->
+            showId = result.getString("showId")?.toInt()
+            showId?.let {
+                detailViewModel.initShow(it)
+            }
+            //Toast.makeText(requireContext(), showId?.toString(), Toast.LENGTH_SHORT).show()
         }
 
-        val sharedPref =
-            activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
-        val showIdPref = sharedPref?.getString(getString(R.string.showID), "-1")
-        if (showIdPref !=null && showIdPref!= "-1") {
-            showId = showIdPref.toInt() - 1
-            removeAppBar()
-        }
+        detailViewModel.getShowsLiveData().observe(viewLifecycleOwner, { show ->
+            loadUI(show)
+            initRecyclerView(show)
+        })
 
-        loadUI()
-        initRecyclerView()
+        if (context?.resources?.getBoolean(R.bool.isTablet) == true) removeAppBar()
+
+
         initListeners()
     }
 
-    private fun removeAppBar(){
-        binding.toolbar.visibility=View.GONE
+    private fun removeAppBar() {
+        binding.toolbar.visibility = View.GONE
     }
 
-    /*override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityShowDetailsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        supportActionBar?.hide()
 
-        showId = intent.extras?.get(EXTRA_SHOWID).toString().toInt() - 1
-
-        loadUI()
-        initRecyclerView()
-        initListeners()
-    }*/
-
-    private fun loadUI() {
-        val show = ShowsFragment.ShowsResource.shows[showId]
+    private fun loadUI(show: Show) {
         binding.showName.text = show.name
         binding.longDescription.text = show.longDescription
         binding.showImage.setImageResource(show.imageResourceId)
 
-        calculateAverageGrade(show)
-        calculateRecyclerSize(show)
+        detailViewModel.calculateAverageGrade()?.let { grade ->
+            binding.numReviews.text = String.format(
+                getString(R.string.averageGrade), show.reviews.size, grade
+            )
+            binding.ratingBar.rating = grade
+        }
+
     }
 
     private fun initListeners() {
-        binding.toolbar.setOnClickListener {
-            findNavController().navigate(R.id.actionDetailToShow)
+        binding.toolbar.setNavigationOnClickListener {
+            //Finish fragment, pop -> showsFragment
+            //findNavController().navigateUp()
+            //Isto pop, ako nema nista na backstacku finish
+            activity?.onBackPressed()
         }
 
         binding.newReviewButton.setOnClickListener {
@@ -105,11 +94,9 @@ class ShowDetailFragment : Fragment() {
         }
     }
 
-    private fun initRecyclerView() {
+    private fun initRecyclerView(show: Show) {
         binding.reviewsRecyclerView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-
-        val show = ShowsFragment.ShowsResource.shows[showId]
 
         adapter = ReviewsAdapter(show.reviews)
         binding.reviewsRecyclerView.adapter = adapter
@@ -135,20 +122,13 @@ class ShowDetailFragment : Fragment() {
             if (dialogBinding.ratingBarReview.rating.compareTo(0.0) == 0) {
                 Toast.makeText(requireContext(), "Rating is mandatory!", Toast.LENGTH_SHORT).show()
             } else {
-                val show = ShowsFragment.ShowsResource.shows[showId]
-                show.addReview(
-                    Review(
-                        username.toString(),
-                        dialogBinding.editReviewInput.text.toString(),
-                        dialogBinding.ratingBarReview.rating.toInt(),
-                        R.drawable.ic_profile_placeholder
-                    )
+                val review = Review(
+                    username.toString(),
+                    dialogBinding.editReviewInput.text.toString(),
+                    dialogBinding.ratingBarReview.rating.toInt(),
+                    R.drawable.ic_profile_placeholder
                 )
-
-                adapter?.setNewReviews(show.reviews)
-
-                calculateAverageGrade(show)
-                calculateRecyclerSize(show)
+                detailViewModel.addReview(review)
 
                 dialog.dismiss()
 
@@ -168,19 +148,4 @@ class ShowDetailFragment : Fragment() {
     }
 
 
-    private fun calculateAverageGrade(show: Show) {
-        val average: Float = show.reviews.map { r -> r.grade }.average().toFloat()
-        binding.numReviews.text = String.format(
-            getString(R.string.averageGrade), show.reviews.size, average
-        )
-        binding.ratingBar.rating = average
-    }
-
-    private fun calculateRecyclerSize(show: Show) {
-        if (show.reviews.size == 2) {
-            binding.reviewsRecyclerView.layoutParams.height = 400
-        } else if (show.reviews.size >= 3 && binding.reviewsRecyclerView.layoutParams.height != 700) {
-            binding.reviewsRecyclerView.layoutParams.height = 700
-        }
-    }
 }

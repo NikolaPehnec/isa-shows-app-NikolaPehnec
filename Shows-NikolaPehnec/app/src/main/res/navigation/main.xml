@@ -13,7 +13,7 @@
         <action
             android:id="@+id/actionLoginToShows"
             app:destination="@id/shows"
-            app:popUpTo="@id/shows"
+            app:popUpTo="@id/login"
             app:popUpToInclusive="true" />
     </fragment>
 
@@ -42,11 +42,6 @@
             android:name="showId"
             app:argType="integer" />
 
-        <action
-            android:id="@+id/actionDetailToShow"
-            app:destination="@id/shows"
-            app:popUpTo="@id/shows"
-            app:popUpToInclusive="true" />
     </fragment>
 
 
