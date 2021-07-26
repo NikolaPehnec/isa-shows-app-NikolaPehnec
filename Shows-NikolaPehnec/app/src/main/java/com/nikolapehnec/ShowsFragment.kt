@@ -10,8 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,39 +27,6 @@ import java.io.File
 
 class ShowsFragment : Fragment() {
 
-    object ShowsResource {
-        val shows = listOf(
-            Show(
-                "1",
-                "The office",
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-                "The Office is an American mockumentary sitcom television series that depicts the everyday" +
-                        " work lives of office employees in the Scranton, Pennsylvania, branch of the fictional Dunder Mifflin Paper Company. " +
-                        "It aired on NBC from March 24, 2005, to May 16, 2013, lasting a total of nine seasons",
-                listOf(), R.drawable.ic_office,
-            ),
-            Show(
-                "2",
-                "Stranger things",
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-                "Stranger Things is an American science fiction horror drama television series created by the Duffer Brothers and " +
-                        "streaming on Netflix. The brothers serve as showrunners and are executive producers along with Shawn Levy and Dan Cohen.",
-                listOf(),
-                R.drawable.ic_stranger_things
-            ),
-            Show(
-                "3",
-                "Krv nije voda",
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-                "Krv nije voda je hrvatska televizijska serija snimana od 2011. do 2013. godine.Serija je nadahnuta svakodnevnim životnim " +
-                        "pričama koje pogađaju mnoge obitelji, poput nestanka člana obitelji, upadanja u zamku nagomilanih dugova, iznenadnog kraha braka" +
-                        " zbog varanja supružnika, borbe oko skrbništva nad djecom, ovisnosti o kockanju ili problema s nestašnom djecom.",
-                listOf(),
-                R.drawable.krv_nije_voda_1
-            )
-        )
-    }
-
     private var _binding: ActivityShowsBinding? = null
     private val binding get() = _binding!!
     private var _dialogBinding: DialogShowsMenuBinding? = null
@@ -65,7 +35,8 @@ class ShowsFragment : Fragment() {
     private var adapter: ShowsAdapter? = null
     private var profileImage: File? = null
 
-    // KOD ON CREATEA POGLEDAJ U FAJLU DAL POSTOJI VEC
+    private val viewModel: ShowsViewModel by viewModels()
+
     private val cameraPermissionForProfilePicture =
         preparePermissionsContract(onPermissionsGranted = {
             val imageFile: File? = FileUtil.createImageFile(requireContext())
@@ -108,6 +79,12 @@ class ShowsFragment : Fragment() {
             initRecyclerView()
         }
 
+        viewModel.getShowsLiveData().observe(viewLifecycleOwner, { shows ->
+            updateShows(shows)
+        })
+
+        viewModel.initShows()
+
         initListeners()
         populateUI()
     }
@@ -119,13 +96,30 @@ class ShowsFragment : Fragment() {
         }
     }
 
+    private fun updateShows(shows: List<Show>) {
+        adapter?.setItems(shows)
+
+        if (adapter?.itemCount?.compareTo(0) == 0) {
+            binding.showsRecycler.isVisible = false
+            binding.noShowsLayout.isVisible = true
+        } else {
+            binding.showsRecycler.isVisible = true
+            binding.noShowsLayout.isVisible = false
+        }
+    }
+
     private fun initRecyclerView() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(ShowsResource.shows) { id ->
+        adapter = ShowsAdapter(emptyList()) { id ->
             run {
                 ShowsFragmentDirections.actionShowToDetail(id.toInt()).also { action ->
+
+                    requireActivity().supportFragmentManager.setFragmentResult(
+                        "showId",
+                        bundleOf("showId" to id)
+                    )
                     findNavController().navigate(action)
                 }
             }
@@ -142,16 +136,10 @@ class ShowsFragment : Fragment() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(ShowsResource.shows) { id ->
+        adapter = ShowsAdapter(emptyList()) { id ->
             run {
-                with(sharedPref?.edit()) {
-                    this?.putString(
-                        getString(R.string.showID),
-                        id
-                    )
-                    this?.apply()
-                }
 
+                setFragmentResult("showId", bundleOf("showId" to id))
                 navHostFragment.navController.navigate(R.id.showDetail)
             }
         }
@@ -161,7 +149,7 @@ class ShowsFragment : Fragment() {
 
 
     private fun initListeners() {
-        binding.hideShowsButton?.setOnClickListener {
+        /*binding.hideShowsButton?.setOnClickListener {
             if (adapter?.itemCount?.compareTo(0) != 0) {
                 adapter?.setItems(listOf())
                 binding.showsRecycler.isVisible = false
@@ -173,7 +161,7 @@ class ShowsFragment : Fragment() {
                 binding.noShowsLayout.isVisible = false
                 binding.hideShowsButton?.text = getString(R.string.hideShows)
             }
-        }
+        }*/
 
         binding.profilePicture?.setOnClickListener {
             showBottomSheet()
