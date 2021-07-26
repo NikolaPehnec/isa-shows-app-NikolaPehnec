@@ -1,22 +1,17 @@
 package com.nikolapehnec
 
-import android.content.ContentValues.TAG
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.util.PatternsCompat
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.nikolapehnec.databinding.ActivityLoginBinding
 import java.util.regex.Pattern
@@ -27,6 +22,9 @@ class LoginFragment : Fragment() {
 
     private var disabledButton: Boolean = true
     private val emailPattern: Pattern = Patterns.EMAIL_ADDRESS
+
+    private val viewModel: LoginViewModel by viewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,23 +38,56 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val fm: FragmentManager? = fragmentManager
-        for (entry in 0 until fm!!.getBackStackEntryCount()) {
-            Log.i(TAG, "Found fragment: " + fm.getBackStackEntryAt(entry).getId())
-        }
 
-        disabledButton=true
+        disabledButton = true
         initLoginButton()
         initListeners()
 
         checkIfSignedIn()
+        checkIfRegisterSuccessful()
+
+        viewModel.getloginResultLiveData().observe(this.viewLifecycleOwner) { isLoginSuccessful ->
+            if (isLoginSuccessful) {
+                Toast.makeText(context, "USPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
+                activity?.onBackPressed()
+                val sharedPref =
+                    activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+                with(sharedPref?.edit()) {
+                    this?.putString(
+                        getString(R.string.loginSuccesful),
+                        viewModel.getAccessToken()
+                    )
+                    this?.putString(getString(R.string.tokenType), viewModel.getTokenType())
+                    this?.putString(getString(R.string.uid), viewModel.getUid())
+                    this?.putString(getString(R.string.client), viewModel.getClient())
+                    this?.apply()
+                }
+            } else {
+                Toast.makeText(context, "NIJE USPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.apply {
+            loginButton.setOnClickListener {
+                viewModel.login(editEmailInput.text.toString(), editPasswordInput.text.toString())
+            }
+        }
     }
 
-    private fun checkIfSignedIn(){
+    private fun checkIfSignedIn() {
         val sharedPref =
             activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
-        if(sharedPref?.getBoolean(getString(R.string.remember_me),false)==true){
+        if (sharedPref?.getBoolean(getString(R.string.remember_me), false) == true) {
             findNavController().navigate(R.id.actionLoginToShows)
+        }
+    }
+
+    private fun checkIfRegisterSuccessful() {
+        val sharedPref =
+            activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+        if (sharedPref?.getBoolean(getString(R.string.registerSuccesful), false) == true) {
+            binding.loginTitle.text = getString(R.string.registerSuccesful)
+            binding.registerButton.isVisible = false
         }
     }
 
@@ -93,16 +124,20 @@ class LoginFragment : Fragment() {
                     binding.editEmailInput.text.toString().split("@")[0]
                 )
                 println(binding.rememberMeCB.isChecked)
-                this?.putBoolean(getString(R.string.remember_me),binding.rememberMeCB.isChecked)
+                this?.putBoolean(getString(R.string.remember_me), binding.rememberMeCB.isChecked)
                 this?.apply()
             }
 
 
-            findNavController().navigate(R.id.actionLoginToShows)
+            //findNavController().navigate(R.id.actionLoginToShows)
         }
     }
 
     private fun initListeners() {
+        binding.registerButton.setOnClickListener {
+            findNavController().navigate(R.id.actionLoginToRegister)
+        }
+
         _binding?.editEmailInput?.doAfterTextChanged {
             if (disabledButton && emailPattern.matcher(_binding?.editEmailInput?.text.toString())
                     .matches()
