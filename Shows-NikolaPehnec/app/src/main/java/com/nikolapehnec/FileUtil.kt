@@ -53,7 +53,7 @@ object FileUtil {
      * Some devices use camera in landscape mode by default so we need to rotate it properly.
      */
     private fun fixRotation(file: File): Bitmap {
-        val ei = ExifInterface(file.path)
+        val ei = ExifInterface(file.absolutePath)
         val orientation: Int = ei.getAttributeInt(
             ExifInterface.TAG_ORIENTATION,
             ExifInterface.ORIENTATION_UNDEFINED

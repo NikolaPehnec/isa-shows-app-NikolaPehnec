@@ -3,12 +3,14 @@ package com.nikolapehnec
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.nikolapehnec.databinding.ViewShowItemBinding
 import com.nikolapehnec.model.Show
 
 class ShowsAdapter(
     private var items: List<Show>,
-    private val onClickCallback: (String) -> Unit
+    private val onClickCallback: (String, String, String, String) -> Unit
 ) : RecyclerView.Adapter<ShowsAdapter.ShowViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShowViewHolder {
@@ -35,12 +37,16 @@ class ShowsAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Show) {
-            binding.showName.text = item.name
+            binding.showName.text = item.title
             binding.showDescription.text = item.description
-            binding.showImage.setImageResource(item.imageResourceId)
 
+            val options: RequestOptions = RequestOptions().centerCrop()
+            Glide.with(itemView).load(item.imgUrl).apply(options).into(binding.showImage)
+            // binding.showImage.setImageResource(item.imageResourceId)
+
+            if (item.description == null) item.description = ""
             binding.root.setOnClickListener {
-                onClickCallback(item.id)
+                onClickCallback(item.id, item.title, item.description!!, item.imgUrl)
             }
         }
     }

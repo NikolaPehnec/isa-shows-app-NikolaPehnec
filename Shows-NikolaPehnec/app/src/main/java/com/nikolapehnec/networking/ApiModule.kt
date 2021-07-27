@@ -21,18 +21,25 @@ object ApiModule {
             })
             .addInterceptor(Interceptor { chain ->
                 val builder = chain.request().newBuilder()
-                val acesstoken = preferences.getString("loginSuccesful", "0")
-                if (acesstoken != null) {
-                    builder.header("access-token", acesstoken)
-                }
+                val acesstoken = preferences.getString("loginSuccessful", "0")
+                val uid = preferences.getString("uid", "0")
+                val client = preferences.getString("client", "0")
 
+                if (acesstoken != null && acesstoken != "0" && uid != null && client != null) {
+                    builder.header("token-type", "Bearer")
+                    builder.header("access-token", acesstoken)
+                    builder.header("client", client)
+                    builder.header("uid", uid)
+                }
                 return@Interceptor chain.proceed(builder.build())
             })
             .build()
 
         retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory((Json {
+                ignoreUnknownKeys = true
+            }).asConverterFactory("application/json".toMediaType()))
             .client(okhttp)
             .build()
             .create(ShowsApiService::class.java)

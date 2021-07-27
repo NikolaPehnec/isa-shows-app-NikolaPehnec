@@ -1,15 +1,12 @@
 package com.nikolapehnec.networking
 
 
-import com.nikolapehnec.model.LoginRequest
-import com.nikolapehnec.model.LoginResponse
-import com.nikolapehnec.model.RegisterRequest
-import com.nikolapehnec.model.RegisterResponse
+import com.nikolapehnec.model.*
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ShowsApiService {
 
@@ -20,10 +17,8 @@ interface ShowsApiService {
     fun login(@Body request: LoginRequest): Call<LoginResponse>
 
     @GET("/shows")
-    fun getShows(
-        @Header("token-type") tokenType: String,
-        @Header("access-token") accessToken: String,
-        @Header("client") client: String,
-        @Header("uid") uid: String
-    )
+    fun getShows(): Call<ShowResponse>
+
+    @GET("/shows/{show_id}/reviews")
+    fun getReviewsForShow(@Path("show_id") id: Int): Call<ReviewResponse>
 }

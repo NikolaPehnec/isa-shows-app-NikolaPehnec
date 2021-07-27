@@ -2,7 +2,7 @@ package com.nikolapehnec.model
 
 import androidx.annotation.DrawableRes
 
-data class Show(
+data class Show2(
     val id: String,
     val name: String,
     val description: String,

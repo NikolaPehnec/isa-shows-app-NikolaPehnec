@@ -83,16 +83,20 @@ class ShowsFragment : Fragment() {
             updateShows(shows)
         })
 
-        viewModel.initShows()
+        viewModel.getShows()
 
         initListeners()
         populateUI()
     }
 
     private fun populateUI() {
-        if (FileUtil.getImageFile(requireContext()) != null) {
+        if (BitmapFactory.decodeFile(profileImage?.path) != null && FileUtil.getImageFile(
+                requireContext()
+            ) != null
+        ) {
             profileImage = FileUtil.getImageFile(requireContext())
             binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+
         }
     }
 
@@ -112,13 +116,16 @@ class ShowsFragment : Fragment() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(emptyList()) { id ->
+        adapter = ShowsAdapter(emptyList()) { id, title, description, imageurl ->
             run {
                 ShowsFragmentDirections.actionShowToDetail(id.toInt()).also { action ->
 
                     requireActivity().supportFragmentManager.setFragmentResult(
                         "showId",
-                        bundleOf("showId" to id)
+                        bundleOf(
+                            "showId" to id, "showTitle" to title, "showDesc" to description,
+                            "showImg" to imageurl
+                        )
                     )
                     findNavController().navigate(action)
                 }
@@ -136,10 +143,14 @@ class ShowsFragment : Fragment() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(emptyList()) { id ->
+        adapter = ShowsAdapter(emptyList()) { id, title, description, imageurl ->
             run {
-
-                setFragmentResult("showId", bundleOf("showId" to id))
+                setFragmentResult(
+                    "showId", bundleOf(
+                        "showId" to id, "showTitle" to title, "showDesc" to description,
+                        "showImg" to imageurl
+                    )
+                )
                 navHostFragment.navController.navigate(R.id.showDetail)
             }
         }
@@ -174,7 +185,10 @@ class ShowsFragment : Fragment() {
         dialog.setContentView(dialogBinding.root)
         dialogBinding.userEmail.text = sharedPref?.getString(getString(R.string.username), "")
 
-        if (FileUtil.getImageFile(requireContext()) != null) {
+        if (BitmapFactory.decodeFile(profileImage?.path) != null && FileUtil.getImageFile(
+                requireContext()
+            ) != null
+        ) {
             profileImage = FileUtil.getImageFile(requireContext())
             dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
         }

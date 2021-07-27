@@ -51,15 +51,16 @@ class RegisterFragment : Fragment() {
         viewModel.getRegistrationResultLiveData().observe(this.viewLifecycleOwner) { isRegisterSuccessful ->
             if (isRegisterSuccessful) {
                 Toast.makeText(context, "USPJEŠNA REGISTRACIJA", Toast.LENGTH_SHORT).show()
-                activity?.onBackPressed()
                 val sharedPref =
                     activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
                 with(sharedPref?.edit()) {
                     this?.putBoolean(
-                        getString(R.string.registerSuccesful),
+                        getString(R.string.registerSuccessful),
                         true)
                     this?.apply()
                 }
+                activity?.onBackPressed()
+
             } else {
 
                 Toast.makeText(context, "NIJE USPJEŠNA REGISTRACIJA", Toast.LENGTH_SHORT).show()

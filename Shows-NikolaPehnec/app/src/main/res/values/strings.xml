@@ -35,10 +35,10 @@
     <string name="register">Register</string>
     <string name="passwordHint">Password</string>
     <string name="repeat_password">Repeat password</string>
-    <string name="registerSuccesful">RegisterSuccessful</string>
-    <string name="ch">loginSuccessful</string>
+    <string name="registerSuccessful">Register Successful</string>
+    <string name="loginSuccessful">loginSuccessful</string>
     <string name="client">client</string>
-    <string name="tokenType">token</string>
+    <string name="tokentype">token</string>
     <string name="uid">uid</string>
-    <string name="messageRegisterSuccesful">Register successful!</string>
+    <string name="messageRegisterSuccessful">Register successful!</string>
 </resources>

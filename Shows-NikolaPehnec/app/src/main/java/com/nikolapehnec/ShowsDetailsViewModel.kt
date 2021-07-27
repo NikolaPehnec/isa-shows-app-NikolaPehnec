@@ -4,31 +4,46 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.nikolapehnec.model.Review
-import com.nikolapehnec.model.Show
+import com.nikolapehnec.model.ReviewResponse
+import com.nikolapehnec.networking.ApiModule
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ShowsDetailsViewModel : ViewModel() {
 
-    private val showLiveData: MutableLiveData<Show> by lazy {
-        MutableLiveData<Show>()
+    private val reviewLiveData: MutableLiveData<List<Review>> by lazy {
+        MutableLiveData<List<Review>>()
     }
 
-    fun getShowsLiveData(): LiveData<Show> {
-        return showLiveData
-    }
-
-    fun initShow(showId: Int) {
-        showLiveData.value = ShowsViewModel.ShowsResource.shows[showId]
+    fun getReviewsLiveData(): LiveData<List<Review>> {
+        return reviewLiveData
     }
 
     fun addReview(review: Review) {
-        showLiveData.value?.reviews = showLiveData.value?.reviews?.plus(review)!!
-        //da se pozove observer
-        showLiveData.value = showLiveData.value
-
+//        reviewLiveData.value?. = showLiveData.value?.reviews?.plus(review)!!
+//        //da se pozove observer
+//        showLiveData.value = showLiveData.value*/
     }
 
     fun calculateAverageGrade(): Float? =
-        getShowsLiveData().value?.reviews?.map { r -> r.grade }?.average()?.toFloat()
+        getReviewsLiveData().value?.map { r -> r.rating }?.average()?.toFloat()
+
+    fun getReviewsByShowId(id: Int) {
+        ApiModule.retrofit.getReviewsForShow(id)
+            .enqueue(object : Callback<ReviewResponse> {
+                override fun onResponse(
+                    call: Call<ReviewResponse>,
+                    response: Response<ReviewResponse>
+                ) {
+                    reviewLiveData.value = response.body()?.review
+                }
+
+                override fun onFailure(call: Call<ReviewResponse>, t: Throwable) {
+                    error("wot")
+                }
+            })
+    }
 
 
 }

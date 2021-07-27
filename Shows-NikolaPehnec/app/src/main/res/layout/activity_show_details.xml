@@ -41,8 +41,8 @@
                 <ImageView
                     android:id="@+id/showImage"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="fitXY"
+                    android:layout_height="200dp"
+                    android:scaleType="fitCenter"
                     tools:src="@drawable/ic_office" />
             </androidx.cardview.widget.CardView>
 

@@ -3,10 +3,10 @@ package com.nikolapehnec
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.nikolapehnec.databinding.ItemReviewBinding
-import com.nikolapehnec.databinding.ViewShowItemBinding
 import com.nikolapehnec.model.Review
-import com.nikolapehnec.model.Show
 
 class ReviewsAdapter(
     private var items: List<Review>
@@ -27,12 +27,12 @@ class ReviewsAdapter(
     }
 
     fun setNewReviews(reviews: List<Review>) {
-        items =reviews
+        items = reviews
         notifyDataSetChanged()
     }
 
-    fun addReview(review:Review){
-        items+=review
+    fun addReview(review: Review) {
+        items += review
         notifyItemInserted(items.size)
     }
 
@@ -41,10 +41,14 @@ class ReviewsAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Review) {
-            binding.reviewImage.setImageResource(item.imageResourceId)
-            binding.reviewText.text=item.text
-            binding.reviewUsername.text = item.user
-            binding.reviewGrade.text = item.grade.toString()
+            if (item.user.imageUrl != null) {
+                val options: RequestOptions = RequestOptions().centerCrop()
+                Glide.with(itemView).load(item.user.imageUrl).apply(options)
+                    .into(binding.reviewImage)
+            }
+            binding.reviewText.text = item.comment
+            binding.reviewUsername.text = item.user.email
+            binding.reviewGrade.text = item.rating.toString()
         }
     }
 

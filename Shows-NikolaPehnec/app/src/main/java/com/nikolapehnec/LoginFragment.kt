@@ -1,6 +1,7 @@
 package com.nikolapehnec
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Patterns
 import android.view.LayoutInflater
@@ -22,6 +23,7 @@ class LoginFragment : Fragment() {
 
     private var disabledButton: Boolean = true
     private val emailPattern: Pattern = Patterns.EMAIL_ADDRESS
+    private var sharedPref: SharedPreferences? = null
 
     private val viewModel: LoginViewModel by viewModels()
 
@@ -32,6 +34,7 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = ActivityLoginBinding.inflate(inflater, container, false)
+        sharedPref = activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
         return binding.root
     }
 
@@ -40,7 +43,7 @@ class LoginFragment : Fragment() {
 
 
         disabledButton = true
-        initLoginButton()
+        //initLoginButton()
         initListeners()
 
         checkIfSignedIn()
@@ -49,19 +52,10 @@ class LoginFragment : Fragment() {
         viewModel.getloginResultLiveData().observe(this.viewLifecycleOwner) { isLoginSuccessful ->
             if (isLoginSuccessful) {
                 Toast.makeText(context, "USPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
-                activity?.onBackPressed()
-                val sharedPref =
-                    activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
-                with(sharedPref?.edit()) {
-                    this?.putString(
-                        getString(R.string.loginSuccesful),
-                        viewModel.getAccessToken()
-                    )
-                    this?.putString(getString(R.string.tokenType), viewModel.getTokenType())
-                    this?.putString(getString(R.string.uid), viewModel.getUid())
-                    this?.putString(getString(R.string.client), viewModel.getClient())
-                    this?.apply()
-                }
+                //activity?.onBackPressed()
+
+                findNavController().navigate(R.id.actionLoginToShows)
+
             } else {
                 Toast.makeText(context, "NIJE USPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
             }
@@ -69,7 +63,12 @@ class LoginFragment : Fragment() {
 
         binding.apply {
             loginButton.setOnClickListener {
-                viewModel.login(editEmailInput.text.toString(), editPasswordInput.text.toString())
+                sharedPref?.let { it1 ->
+                    viewModel.login(
+                        editEmailInput.text.toString(), editPasswordInput.text.toString(),
+                        it1
+                    )
+                }
             }
         }
     }
@@ -85,8 +84,8 @@ class LoginFragment : Fragment() {
     private fun checkIfRegisterSuccessful() {
         val sharedPref =
             activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
-        if (sharedPref?.getBoolean(getString(R.string.registerSuccesful), false) == true) {
-            binding.loginTitle.text = getString(R.string.registerSuccesful)
+        if (sharedPref?.getBoolean(getString(R.string.registerSuccessful), false) == true) {
+            binding.loginTitle.text = getString(R.string.registerSuccessful)
             binding.registerButton.isVisible = false
         }
     }
@@ -95,24 +94,6 @@ class LoginFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    /* override fun onCreate(savedInstanceState: Bundle?) {
-         super.onCreate(savedInstanceState)
-         //supportActionBar?.hide()
-
-         _binding = ActivityLoginBinding.inflate(layoutInflater)
-         setContentView(_binding?.root)
-
-         initLoginButton()
-         initListeners()
-
-         if (intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME) != null && intent.type == "text/plain") {
-             val intent2 = Intent()
-             intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)?.let {
-             intent2.setClassName(this, it) }
-             startActivity(intent2)
-         }
-     }*/
 
     private fun initLoginButton() {
         binding.loginButton.setOnClickListener {

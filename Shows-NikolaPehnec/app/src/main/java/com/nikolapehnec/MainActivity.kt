@@ -1,10 +1,10 @@
 package com.nikolapehnec
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.nikolapehnec.networking.ApiModule
+import androidx.appcompat.app.AppCompatActivity
 import com.nikolapehnec.databinding.ActivityMainBinding
+import com.nikolapehnec.networking.ApiModule
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,6 +16,6 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         setContentView(binding.root)
 
-        ApiModule.initRetrofit(getPreferences(Context.MODE_PRIVATE))
+        ApiModule.initRetrofit(applicationContext.getSharedPreferences("1", Context.MODE_PRIVATE))
     }
 }
