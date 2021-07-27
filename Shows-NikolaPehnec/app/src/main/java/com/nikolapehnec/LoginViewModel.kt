@@ -37,6 +37,8 @@ class LoginViewModel : ViewModel() {
                         this?.putString("uid", uid)
                         this?.putString("client", client)
                         this?.putBoolean("registerSuccessful", false)
+                        this?.putString("email", response.body()?.user?.email)
+                        this?.putString("user_id", response.body()?.user?.id.toString())
                         this?.apply()
                     }
 
@@ -46,7 +48,8 @@ class LoginViewModel : ViewModel() {
                 override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
                     loginResultLiveData.value = false
                 }
-
             })
     }
+
+
 }

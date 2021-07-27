@@ -40,5 +40,7 @@
     <string name="client">client</string>
     <string name="tokentype">token</string>
     <string name="uid">uid</string>
+    <string name="email">email</string>
+    <string name="user_id">user_id</string>
     <string name="messageRegisterSuccessful">Register successful!</string>
 </resources>

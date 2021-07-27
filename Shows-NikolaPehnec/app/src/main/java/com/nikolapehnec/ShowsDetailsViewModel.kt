@@ -3,14 +3,17 @@ package com.nikolapehnec
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.nikolapehnec.model.Review
-import com.nikolapehnec.model.ReviewRequest
-import com.nikolapehnec.model.ReviewResponse
-import com.nikolapehnec.model.SingleReviewResponse
+import com.nikolapehnec.model.*
 import com.nikolapehnec.networking.ApiModule
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 
 class ShowsDetailsViewModel : ViewModel() {
 
@@ -28,12 +31,6 @@ class ShowsDetailsViewModel : ViewModel() {
         return reviewLiveData
     }
 
-    fun addReview(review: Review) {
-//        reviewLiveData.value?. = showLiveData.value?.reviews?.plus(review)!!
-//        //da se pozove observer
-//        showLiveData.value = showLiveData.value*/
-    }
-
     fun calculateAverageGrade(): Float? =
         getReviewsLiveData().value?.map { r -> r.rating }?.average()?.toFloat()
 
@@ -48,7 +45,6 @@ class ShowsDetailsViewModel : ViewModel() {
                 }
 
                 override fun onFailure(call: Call<ReviewResponse>, t: Throwable) {
-                    error("wot")
                 }
             })
     }
@@ -66,9 +62,10 @@ class ShowsDetailsViewModel : ViewModel() {
                 override fun onFailure(call: Call<SingleReviewResponse>, t: Throwable) {
                     postReviewResultLiveData.value = false
                 }
-            }
-        )
+            })
     }
+
+
 
 
 }

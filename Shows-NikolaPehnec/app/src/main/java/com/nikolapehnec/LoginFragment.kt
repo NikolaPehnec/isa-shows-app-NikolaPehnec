@@ -2,12 +2,14 @@ package com.nikolapehnec
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -41,33 +43,43 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         disabledButton = true
-        //initLoginButton()
         initListeners()
-
+        initLoginListeners()
         checkIfSignedIn()
         checkIfRegisterSuccessful()
 
         viewModel.getloginResultLiveData().observe(this.viewLifecycleOwner) { isLoginSuccessful ->
             if (isLoginSuccessful) {
                 Toast.makeText(context, "USPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
-                //activity?.onBackPressed()
-
                 findNavController().navigate(R.id.actionLoginToShows)
-
             } else {
-                Toast.makeText(context, "NIJE USPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "NEUSPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
             }
         }
 
+    }
+
+    private fun initLoginListeners(){
         binding.apply {
             loginButton.setOnClickListener {
-                sharedPref?.let { it1 ->
+
+                sharedPref?.let { sharedPref ->
                     viewModel.login(
-                        editEmailInput.text.toString(), editPasswordInput.text.toString(),
-                        it1
+                        editEmailInput.text.toString(),
+                        editPasswordInput.text.toString(),
+                        sharedPref
                     )
+                }
+
+                with(sharedPref?.edit()) {
+                    this?.putString(
+                        getString(R.string.username),
+                        editEmailInput.text.toString()
+                    )
+                    this?.putBoolean(getString(R.string.remember_me), rememberMeCB.isChecked)
+                    this?.putBoolean(getString(R.string.registerSuccessful), false)
+                    this?.apply()
                 }
             }
         }
@@ -95,89 +107,70 @@ class LoginFragment : Fragment() {
         _binding = null
     }
 
-    private fun initLoginButton() {
-        binding.loginButton.setOnClickListener {
-            val sharedPref =
-                activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
-            with(sharedPref?.edit()) {
-                this?.putString(
-                    getString(R.string.username),
-                    binding.editEmailInput.text.toString().split("@")[0]
-                )
-                println(binding.rememberMeCB.isChecked)
-                this?.putBoolean(getString(R.string.remember_me), binding.rememberMeCB.isChecked)
-                this?.apply()
-            }
-
-
-            //findNavController().navigate(R.id.actionLoginToShows)
-        }
-    }
-
     private fun initListeners() {
         binding.registerButton.setOnClickListener {
             findNavController().navigate(R.id.actionLoginToRegister)
         }
 
-        _binding?.editEmailInput?.doAfterTextChanged {
-            if (disabledButton && emailPattern.matcher(_binding?.editEmailInput?.text.toString())
+        binding.editEmailInput.doAfterTextChanged {
+            if (disabledButton && emailPattern.matcher(binding.editEmailInput.text.toString())
                     .matches()
-                && _binding?.editPasswordInput?.text.toString().trim().length > 5
+                && binding.editPasswordInput.text.toString().trim().length > 5
             ) {
-                _binding?.loginButton?.setBackgroundResource(R.drawable.ic_button_white)
-                _binding?.loginButton?.setTextColor(
+                binding.loginButton.setBackgroundResource(R.drawable.ic_button_white)
+                binding.loginButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
                         R.color.background
                     )
                 )
-                _binding?.loginButton?.isEnabled = true
+                binding.loginButton.isEnabled = true
                 disabledButton = false
-                _binding?.emailInput?.error = null
-            } else if (!disabledButton && !emailPattern.matcher(_binding?.editEmailInput?.text.toString())
+                binding.emailInput.error = null
+            } else if (!disabledButton && !emailPattern.matcher(binding.editEmailInput.text.toString())
                     .matches()
             ) {
-                _binding?.loginButton?.setBackgroundResource(R.drawable.ic_button_gray)
-                _binding?.loginButton?.setTextColor(
+                binding.loginButton.setBackgroundResource(R.drawable.ic_button_gray)
+                binding.loginButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
                         R.color.white
                     )
                 )
-                _binding?.loginButton?.isEnabled = false
+                binding.loginButton.isEnabled = false
                 disabledButton = true
             }
-            if (!emailPattern.matcher(_binding?.editEmailInput?.text.toString()).matches()) {
-                _binding?.emailInput?.error = "Invalid email"
+            if (!emailPattern.matcher(binding.editEmailInput.text.toString()).matches()) {
+                binding.emailInput.error = "Invalid email"
             } else {
-                _binding?.emailInput?.error = null
+                binding.emailInput.error = null
             }
         }
 
 
-        _binding?.editPasswordInput?.doAfterTextChanged {
-            if (disabledButton && _binding?.editPasswordInput?.text.toString()
-                    .trim().length > 5 && emailPattern.matcher(_binding?.editEmailInput?.text.toString())
+        binding.editPasswordInput.doAfterTextChanged {
+            if (disabledButton && binding.editPasswordInput.text.toString()
+                    .trim().length > 5 && emailPattern.matcher(binding.editEmailInput?.text.toString())
                     .matches()
             ) {
-                _binding?.loginButton?.setBackgroundResource(R.drawable.ic_button_white)
-                _binding?.loginButton?.setTextColor(
+                binding.loginButton.setBackgroundResource(R.drawable.ic_button_white)
+                binding.loginButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
                         R.color.background
                     )
                 )
-                _binding?.loginButton?.isEnabled = true
+                binding.loginButton.isEnabled = true
                 disabledButton = false
-            } else if (_binding?.editPasswordInput?.text.toString().trim().length < 6) {
-                _binding?.loginButton?.setBackgroundResource(R.drawable.ic_button_gray)
-                _binding?.loginButton?.setTextColor(
+            } else if (binding.editPasswordInput.text.toString().trim().length < 6) {
+                binding.loginButton.setBackgroundResource(R.drawable.ic_button_gray)
+                binding.loginButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
                         R.color.white
                     )
                 )
-                _binding?.loginButton?.isEnabled = false
+                binding.loginButton.isEnabled = false
                 disabledButton = true
             }
         }

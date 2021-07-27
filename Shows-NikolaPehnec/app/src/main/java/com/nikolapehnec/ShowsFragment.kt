@@ -26,7 +26,6 @@ import java.io.File
 
 
 class ShowsFragment : Fragment() {
-
     private var _binding: ActivityShowsBinding? = null
     private val binding get() = _binding!!
     private var _dialogBinding: DialogShowsMenuBinding? = null
@@ -57,6 +56,13 @@ class ShowsFragment : Fragment() {
 
         dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
         binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+
+        val id = sharedPref?.getString(getString(R.string.user_id), "")
+        val email = sharedPref?.getString(getString(R.string.email), "")
+
+        if (id != null && email != null && profileImage != null) {
+            viewModel.sendPicture(id, email, profileImage!!.path)
+        }
     })
 
     override fun onCreateView(
@@ -96,7 +102,6 @@ class ShowsFragment : Fragment() {
         ) {
             profileImage = FileUtil.getImageFile(requireContext())
             binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
-
         }
     }
 
@@ -160,20 +165,6 @@ class ShowsFragment : Fragment() {
 
 
     private fun initListeners() {
-        /*binding.hideShowsButton?.setOnClickListener {
-            if (adapter?.itemCount?.compareTo(0) != 0) {
-                adapter?.setItems(listOf())
-                binding.showsRecycler.isVisible = false
-                binding.noShowsLayout.isVisible = true
-                binding.hideShowsButton?.text = getString(R.string.showShows)
-            } else {
-                adapter?.setItems(ShowsResource.shows)
-                binding.showsRecycler.isVisible = true
-                binding.noShowsLayout.isVisible = false
-                binding.hideShowsButton?.text = getString(R.string.hideShows)
-            }
-        }*/
-
         binding.profilePicture?.setOnClickListener {
             showBottomSheet()
         }

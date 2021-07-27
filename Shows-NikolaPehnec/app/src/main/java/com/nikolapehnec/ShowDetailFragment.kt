@@ -17,14 +17,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowDetailsBinding
 import com.nikolapehnec.databinding.DialogAddReviewBinding
 import com.nikolapehnec.model.Review
-import com.nikolapehnec.model.User
 
 class ShowDetailFragment : Fragment() {
-
     private var _binding: ActivityShowDetailsBinding? = null
     private val binding get() = _binding!!
 
-    //val args: ShowDetailFragmentArgs by navArgs()
     private var adapter: ReviewsAdapter? = null
     private var showId: Int? = 0
     private val detailViewModel: ShowsDetailsViewModel by viewModels()
@@ -93,10 +90,8 @@ class ShowDetailFragment : Fragment() {
 
         detailViewModel.calculateAverageGrade()?.let { grade ->
             binding.numReviews.text = String.format(
-                getString(R.string.averageGrade), reviews.size,
-                grade
+                getString(R.string.averageGrade), reviews.size, grade
             )
-
             binding.ratingBar.rating = grade
         }
 
@@ -104,9 +99,6 @@ class ShowDetailFragment : Fragment() {
 
     private fun initListeners() {
         binding.toolbar.setNavigationOnClickListener {
-            //Finish fragment, pop -> showsFragment
-            //findNavController().navigateUp()
-            //Isto pop, ako nema nista na backstacku finish
             activity?.onBackPressed()
         }
 
@@ -135,22 +127,10 @@ class ShowDetailFragment : Fragment() {
 
         dialogBinding.editReviewInput.requestFocus()
 
-        val sharedPref =
-            activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
-        val username = sharedPref?.getString(getString(R.string.username), "")
-
         dialogBinding.submitButton.setOnClickListener {
             if (dialogBinding.ratingBarReview.rating.compareTo(0.0) == 0) {
                 Toast.makeText(requireContext(), "Rating is mandatory!", Toast.LENGTH_SHORT).show()
             } else {
-                /*val review = Review(
-                    username.toString(),
-                    dialogBinding.editReviewInput.text.toString(),
-                    dialogBinding.ratingBarReview.rating.toInt(),
-                    R.drawable.ic_profile_placeholder,
-                    User(111, username!!, null)
-                )*/
-
                 detailViewModel.postReview(
                     dialogBinding.ratingBarReview.rating.toInt(),
                     dialogBinding.editReviewInput.text.toString(),

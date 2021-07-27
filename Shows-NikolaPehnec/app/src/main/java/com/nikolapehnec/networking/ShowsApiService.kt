@@ -2,11 +2,10 @@ package com.nikolapehnec.networking
 
 
 import com.nikolapehnec.model.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface ShowsApiService {
 
@@ -24,4 +23,12 @@ interface ShowsApiService {
 
     @POST("/reviews")
     fun postReview(@Body request: ReviewRequest): Call<SingleReviewResponse>
+
+    @Multipart
+    @PUT("/users")
+    fun updateImage(
+        @Part("id") id: RequestBody,
+        @Part("email") email: RequestBody,
+        @Part image_url: MultipartBody.Part
+    ): Call<LoginResponse>
 }

@@ -42,7 +42,6 @@ class ShowsAdapter(
 
             val options: RequestOptions = RequestOptions().centerCrop()
             Glide.with(itemView).load(item.imgUrl).apply(options).into(binding.showImage)
-            // binding.showImage.setImageResource(item.imageResourceId)
 
             if (item.description == null) item.description = ""
             binding.root.setOnClickListener {
