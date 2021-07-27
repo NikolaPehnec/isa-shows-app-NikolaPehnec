@@ -64,6 +64,12 @@ class ShowDetailFragment : Fragment() {
             initRecyclerView(reviews)
         })
 
+        detailViewModel.getPostReviewResultLiveData().observe(viewLifecycleOwner, { isSuccesful ->
+            if (isSuccesful) {
+                showId?.let { detailViewModel.getReviewsByShowId(it) }
+            }
+        })
+
         if (context?.resources?.getBoolean(R.bool.isTablet) == true) removeAppBar()
 
         initListeners()
@@ -82,7 +88,7 @@ class ShowDetailFragment : Fragment() {
         this.view?.let {
             Glide.with(it).load(showImageUrl).diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true).apply(options).into(binding.showImage)
-            binding.showImage.isVisible=true
+            binding.showImage.isVisible = true
         }
 
         detailViewModel.calculateAverageGrade()?.let { grade ->
@@ -137,14 +143,19 @@ class ShowDetailFragment : Fragment() {
             if (dialogBinding.ratingBarReview.rating.compareTo(0.0) == 0) {
                 Toast.makeText(requireContext(), "Rating is mandatory!", Toast.LENGTH_SHORT).show()
             } else {
-                val review = Review(
+                /*val review = Review(
                     username.toString(),
                     dialogBinding.editReviewInput.text.toString(),
                     dialogBinding.ratingBarReview.rating.toInt(),
                     R.drawable.ic_profile_placeholder,
                     User(111, username!!, null)
+                )*/
+
+                detailViewModel.postReview(
+                    dialogBinding.ratingBarReview.rating.toInt(),
+                    dialogBinding.editReviewInput.text.toString(),
+                    showId.toString()
                 )
-                detailViewModel.addReview(review)
 
                 dialog.dismiss()
 

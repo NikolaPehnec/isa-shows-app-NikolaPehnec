@@ -4,7 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.nikolapehnec.model.Review
+import com.nikolapehnec.model.ReviewRequest
 import com.nikolapehnec.model.ReviewResponse
+import com.nikolapehnec.model.SingleReviewResponse
 import com.nikolapehnec.networking.ApiModule
 import retrofit2.Call
 import retrofit2.Callback
@@ -14,6 +16,12 @@ class ShowsDetailsViewModel : ViewModel() {
 
     private val reviewLiveData: MutableLiveData<List<Review>> by lazy {
         MutableLiveData<List<Review>>()
+    }
+
+    private val postReviewResultLiveData: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
+
+    fun getPostReviewResultLiveData(): LiveData<Boolean> {
+        return postReviewResultLiveData
     }
 
     fun getReviewsLiveData(): LiveData<List<Review>> {
@@ -43,6 +51,23 @@ class ShowsDetailsViewModel : ViewModel() {
                     error("wot")
                 }
             })
+    }
+
+    fun postReview(rating: Int, comment: String?, showId: String) {
+        ApiModule.retrofit.postReview(ReviewRequest(rating, comment, showId)).enqueue(
+            object : Callback<SingleReviewResponse> {
+                override fun onResponse(
+                    call: Call<SingleReviewResponse>,
+                    response: Response<SingleReviewResponse>
+                ) {
+                    postReviewResultLiveData.value = response.isSuccessful
+                }
+
+                override fun onFailure(call: Call<SingleReviewResponse>, t: Throwable) {
+                    postReviewResultLiveData.value = false
+                }
+            }
+        )
     }
 
 
