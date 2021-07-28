@@ -9,18 +9,30 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ShowsNikolaPehnec">
-        <activity android:name=".WelcomeActivity"></activity>
+        <activity
+            android:name=".ShowDetailsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ShowsActivity"
+            android:exported="true">
+
+
+        </activity>
+        <activity android:name=".WelcomeActivity" />
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>

@@ -10,4 +10,17 @@
     <string name="login_message">In order to continue please log in.</string>
     <string name="welcome_mess">Welcome, %s!</string>
     <string name="login">Login</string>
+    <string name="shows">Shows</string>
+    <string name="noShowsMessage">Your shows are not showing. Get it?</string>
+    <string name="showShows">Show shows</string>
+    <string name="hideShows">Hide shows</string>
+    <string name="reviews">Reviews</string>
+    <string name="noReviews">No reviews yet.</string>
+    <string name="writeReview">Write a review</string>
+    <string name="newReview">Write a review</string>
+    <string name="comment">Comment</string>
+    <string name="submit">Submit</string>
+    <string name="username">username</string>
+    <string name="averageGrade">%d REVIEWS, %.2f AVERAGE</string>
+    <string name="mandatoryRating">Rating is mandatory!</string>
 </resources>
