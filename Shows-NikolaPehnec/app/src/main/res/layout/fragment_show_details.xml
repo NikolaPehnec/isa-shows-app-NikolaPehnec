@@ -17,7 +17,7 @@
         app:navigationIcon="?attr/homeAsUpIndicator" />
 
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -25,8 +25,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="25dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="25dp">
 
             <TextView
                 android:id="@+id/showName"
@@ -98,7 +98,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/reviewsRecyclerView"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp">
+                    android:layout_height="wrap_content">
 
                 </androidx.recyclerview.widget.RecyclerView>
             </LinearLayout>
@@ -130,7 +130,7 @@
                 android:textColor="@color/white" />
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>
 
 

@@ -1,18 +1,15 @@
 package com.nikolapehnec
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Layout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavAction
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.nikolapehnec.databinding.ActivityShowsBinding
+import com.nikolapehnec.databinding.FragmentShowsBinding
 import com.nikolapehnec.model.Show
 
 class ShowsFragment : Fragment() {
@@ -50,7 +47,7 @@ class ShowsFragment : Fragment() {
         )
     }
 
-    private var _binding: ActivityShowsBinding? = null
+    private var _binding: FragmentShowsBinding? = null
     private val binding get() = _binding!!
 
     private var adapter: ShowsAdapter? = null
@@ -60,18 +57,18 @@ class ShowsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = ActivityShowsBinding.inflate(inflater, container, false)
+        _binding = FragmentShowsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val isTablet=context?.resources?.getBoolean(R.bool.isTablet)
-        if(isTablet == true){
+        val isTablet = context?.resources?.getBoolean(R.bool.isTablet)
+        if (isTablet == true) {
             initTabletRecyclerView()
             initListeners()
-        } else{
+        } else {
             initRecyclerView()
             initListeners()
         }
@@ -103,8 +100,9 @@ class ShowsFragment : Fragment() {
         binding.showsRecycler?.adapter = adapter
     }
 
-    private fun initTabletRecyclerView(){
-        val navHostFragment = childFragmentManager.findFragmentById(R.id.detailShowFragmentContainer) as NavHostFragment
+    private fun initTabletRecyclerView() {
+        val navHostFragment =
+            childFragmentManager.findFragmentById(R.id.detailShowFragmentContainer) as NavHostFragment
         navHostFragment.navController.navigate(R.id.showDetail)
 
         binding.showsRecycler?.layoutManager =

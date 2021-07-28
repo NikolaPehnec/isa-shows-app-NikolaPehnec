@@ -6,19 +6,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.nikolapehnec.databinding.ActivityShowDetailsBinding
 import com.nikolapehnec.databinding.DialogAddReviewBinding
+import com.nikolapehnec.databinding.FragmentShowDetailsBinding
 import com.nikolapehnec.model.Review
 import com.nikolapehnec.model.Show
 
 class ShowDetailFragment : Fragment() {
 
-    private var _binding: ActivityShowDetailsBinding? = null
+    private var _binding: FragmentShowDetailsBinding? = null
     private val binding get() = _binding!!
 
     val args: ShowDetailFragmentArgs by navArgs()
@@ -26,22 +27,12 @@ class ShowDetailFragment : Fragment() {
     private var adapter: ReviewsAdapter? = null
     private var showId: Int = 0
 
-    /*companion object {
-        private const val EXTRA_SHOWID = "EXTRA_SHOWID"
-
-        fun buildIntent(showId: String, context: Activity): Intent {
-            val intent = Intent(context, ShowDetailsActivity::class.java)
-            intent.putExtra(EXTRA_SHOWID, showId)
-            return intent
-        }
-    }*/
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = ActivityShowDetailsBinding.inflate(inflater, container, false)
+        _binding = FragmentShowDetailsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -50,7 +41,7 @@ class ShowDetailFragment : Fragment() {
 
 
         try {
-            showId = args.showId-1
+            showId = args.showId - 1
         } catch (e: Exception) {
             showId = 0
         }
@@ -58,7 +49,7 @@ class ShowDetailFragment : Fragment() {
         val sharedPref =
             activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
         val showIdPref = sharedPref?.getString(getString(R.string.showID), "-1")
-        if (showIdPref !=null && showIdPref!= "-1") {
+        if (showIdPref != null && showIdPref != "-1") {
             showId = showIdPref.toInt() - 1
             removeAppBar()
         }
@@ -68,22 +59,9 @@ class ShowDetailFragment : Fragment() {
         initListeners()
     }
 
-    private fun removeAppBar(){
-        binding.toolbar.visibility=View.GONE
+    private fun removeAppBar() {
+        binding.toolbar.isVisible = false
     }
-
-    /*override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityShowDetailsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        supportActionBar?.hide()
-
-        showId = intent.extras?.get(EXTRA_SHOWID).toString().toInt() - 1
-
-        loadUI()
-        initRecyclerView()
-        initListeners()
-    }*/
 
     private fun loadUI() {
         val show = ShowsFragment.ShowsResource.shows[showId]
@@ -92,12 +70,11 @@ class ShowDetailFragment : Fragment() {
         binding.showImage.setImageResource(show.imageResourceId)
 
         calculateAverageGrade(show)
-        calculateRecyclerSize(show)
     }
 
     private fun initListeners() {
         binding.toolbar.setOnClickListener {
-            findNavController().navigate(R.id.actionDetailToShow)
+            activity?.onBackPressed()
         }
 
         binding.newReviewButton.setOnClickListener {
@@ -115,8 +92,8 @@ class ShowDetailFragment : Fragment() {
         binding.reviewsRecyclerView.adapter = adapter
 
         if (adapter?.itemCount?.compareTo(0) == 0) {
-            binding.reviewsVisible.visibility = View.GONE
-            binding.reviewsInvisible.visibility = View.VISIBLE
+            binding.reviewsVisible.isVisible = false
+            binding.reviewsInvisible.isVisible = true
         }
     }
 
@@ -133,28 +110,30 @@ class ShowDetailFragment : Fragment() {
 
         dialogBinding.submitButton.setOnClickListener {
             if (dialogBinding.ratingBarReview.rating.compareTo(0.0) == 0) {
-                Toast.makeText(requireContext(), "Rating is mandatory!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.mandatoryRating),
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
                 val show = ShowsFragment.ShowsResource.shows[showId]
-                show.addReview(
-                    Review(
-                        username.toString(),
-                        dialogBinding.editReviewInput.text.toString(),
-                        dialogBinding.ratingBarReview.rating.toInt(),
-                        R.drawable.ic_profile_placeholder
-                    )
+                val review: Review = Review(
+                    username.toString(),
+                    dialogBinding.editReviewInput.text.toString(),
+                    dialogBinding.ratingBarReview.rating.toInt(),
+                    R.drawable.ic_profile_placeholder
                 )
 
-                adapter?.setNewReviews(show.reviews)
+                show.reviews += review
+                adapter?.reviewAdded(review)
 
                 calculateAverageGrade(show)
-                calculateRecyclerSize(show)
 
                 dialog.dismiss()
 
                 if (adapter?.itemCount?.compareTo(0) != 0) {
-                    binding.reviewsVisible.visibility = View.VISIBLE
-                    binding.reviewsInvisible.visibility = View.GONE
+                    binding.reviewsVisible.isVisible = true
+                    binding.reviewsInvisible.isVisible = false
                 }
 
             }
@@ -176,11 +155,4 @@ class ShowDetailFragment : Fragment() {
         binding.ratingBar.rating = average
     }
 
-    private fun calculateRecyclerSize(show: Show) {
-        if (show.reviews.size == 2) {
-            binding.reviewsRecyclerView.layoutParams.height = 400
-        } else if (show.reviews.size >= 3 && binding.reviewsRecyclerView.layoutParams.height != 700) {
-            binding.reviewsRecyclerView.layoutParams.height = 700
-        }
-    }
 }

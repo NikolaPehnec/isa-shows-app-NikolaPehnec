@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/login"
         android:name="com.nikolapehnec.LoginFragment"
-        tools:layout="@layout/activity_login">
+        tools:layout="@layout/fragment_login">
 
         <action
             android:id="@+id/actionLoginToShows"
@@ -20,7 +20,7 @@
     <fragment
         android:id="@+id/shows"
         android:name="com.nikolapehnec.ShowsFragment"
-        tools:layout="@layout/activity_shows">
+        tools:layout="@layout/fragment_shows">
 
         <action
             android:id="@+id/actionShowToDetail"
@@ -36,17 +36,12 @@
     <fragment
         android:id="@+id/showDetail"
         android:name="com.nikolapehnec.ShowDetailFragment"
-        tools:layout="@layout/activity_show_details">
+        tools:layout="@layout/fragment_show_details">
 
         <argument
             android:name="showId"
             app:argType="integer" />
 
-        <action
-            android:id="@+id/actionDetailToShow"
-            app:destination="@id/shows"
-            app:popUpTo="@id/shows"
-            app:popUpToInclusive="true" />
     </fragment>
 
 

@@ -8,11 +8,5 @@ data class Show(
     val description: String,
     val longDescription: String,
     var reviews: List<Review>,
-    @DrawableRes val imageResourceId: Int,
-
-
-    ) {
-    fun addReview(review: Review) {
-        reviews += review
-    }
-}
+    @DrawableRes val imageResourceId: Int
+)
