@@ -1,76 +1,77 @@
 package com.nikolapehnec
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Patterns
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.core.util.PatternsCompat
 import androidx.core.widget.doAfterTextChanged
-import com.nikolapehnec.databinding.ActivityLoginBinding
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.nikolapehnec.databinding.FragmentLoginBinding
 import java.util.regex.Pattern
 
-class LoginActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityLoginBinding
+class LoginFragment : Fragment() {
+    private var _binding: FragmentLoginBinding? = null
+    private val binding get() = _binding!!
+
     private var disabledButton: Boolean = true
     private val emailPattern: Pattern = Patterns.EMAIL_ADDRESS
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        supportActionBar?.hide()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
+        disabledButton = true
         initLoginButton()
         initListeners()
+    }
 
-        /*if (intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME) != null && intent.type == "text/plain") {
-            val intent2 = Intent()
-            intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)?.let {
-            intent2.setClassName(this, it) }
-            startActivity(intent2)
-        }*/
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun initLoginButton() {
         binding.loginButton.setOnClickListener {
-            val sharedPref = applicationContext.getSharedPreferences("1",Context.MODE_PRIVATE)
-            with(sharedPref.edit()) {
-                putString(
+            val sharedPref =
+                activity?.getPreferences(Context.MODE_PRIVATE)
+            with(sharedPref?.edit()) {
+                this?.putString(
                     getString(R.string.username),
                     binding.editEmailInput.text.toString().split("@")[0]
                 )
-                apply()
+                this?.apply()
             }
 
-            val intent = Intent(this, ShowsActivity::class.java)
-            startActivity(intent)
+
+            findNavController().navigate(R.id.actionLoginToShows)
         }
-
-        //data ili action
-        /*binding.loginButton.setOnClickListener {
-            val welcomeActivityIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_PACKAGE_NAME, "com.nikolapehnec.WelcomeActivity")
-                type = "text/plain"
-            }
-            startActivity(welcomeActivityIntent)
-        }*/
     }
 
     private fun initListeners() {
         binding.editEmailInput.doAfterTextChanged {
             if (disabledButton && emailPattern.matcher(binding.editEmailInput.text.toString())
                     .matches()
-                && binding.editPasswordInput.text.toString()
-                    .trim().length > 5
+                && binding.editPasswordInput.text.toString().trim().length > 5
             ) {
                 binding.loginButton.setBackgroundResource(R.drawable.ic_button_white)
-                binding.loginButton.setTextColor(ContextCompat.getColor(this, R.color.background))
+                binding.loginButton.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.background
+                    )
+                )
                 binding.loginButton.isEnabled = true
                 disabledButton = false
                 binding.emailInput.error = null
@@ -78,7 +79,12 @@ class LoginActivity : AppCompatActivity() {
                     .matches()
             ) {
                 binding.loginButton.setBackgroundResource(R.drawable.ic_button_gray)
-                binding.loginButton.setTextColor(ContextCompat.getColor(this, R.color.white))
+                binding.loginButton.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.white
+                    )
+                )
                 binding.loginButton.isEnabled = false
                 disabledButton = true
             }
@@ -96,12 +102,22 @@ class LoginActivity : AppCompatActivity() {
                     .matches()
             ) {
                 binding.loginButton.setBackgroundResource(R.drawable.ic_button_white)
-                binding.loginButton.setTextColor(ContextCompat.getColor(this, R.color.background))
+                binding.loginButton.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.background
+                    )
+                )
                 binding.loginButton.isEnabled = true
                 disabledButton = false
             } else if (binding.editPasswordInput.text.toString().trim().length < 6) {
                 binding.loginButton.setBackgroundResource(R.drawable.ic_button_gray)
-                binding.loginButton.setTextColor(ContextCompat.getColor(this, R.color.white))
+                binding.loginButton.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.white
+                    )
+                )
                 binding.loginButton.isEnabled = false
                 disabledButton = true
             }

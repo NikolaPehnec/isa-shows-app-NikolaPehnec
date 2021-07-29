@@ -23,4 +23,5 @@
     <string name="username">username</string>
     <string name="averageGrade">%d REVIEWS, %.2f AVERAGE</string>
     <string name="mandatoryRating">Rating is mandatory!</string>
+    <string name="showID">showId</string>
 </resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_tablet"
+    app:startDestination="@id/showDetail">
+
+
+    <fragment
+        android:id="@+id/showDetail"
+        android:name="com.nikolapehnec.ShowDetailFragment"
+        tools:layout="@layout/fragment_show_details">
+
+        <action
+            android:id="@+id/changeDetail"
+            app:destination="@id/showDetail" />
+
+        <argument
+            android:name="showId"
+            app:argType="integer" />
+
+    </fragment>
+
+</navigation>
