@@ -1,6 +1,5 @@
 package com.nikolapehnec
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -17,19 +16,15 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowDetailsBinding
 import com.nikolapehnec.databinding.DialogAddReviewBinding
 import com.nikolapehnec.model.Review
+import com.nikolapehnec.viewModel.ShowsDetailsViewModel
 
 class ShowDetailFragment : Fragment() {
     private var _binding: ActivityShowDetailsBinding? = null
     private val binding get() = _binding!!
-
     private var adapter: ReviewsAdapter? = null
-    private var showId: Int? = 0
-    private val detailViewModel: ShowsDetailsViewModel by viewModels()
 
-    private var showTitle = ""
-    private var showDescription = ""
-    private var showImageUrl = ""
-
+    //Ne treba factory jer je vec kreiran u ShowsFragmentu
+    private val detailViewModel: ShowsDetailsViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,30 +35,23 @@ class ShowDetailFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            "showId",
-            viewLifecycleOwner
-        ) { key, result ->
-            showId = result.getString("showId")?.toInt()
-            showDescription = result.getString("showDesc").toString()
-            showTitle = result.getString("showTitle").toString()
-            showImageUrl = result.getString("showImg").toString()
-
-            showId?.let { detailViewModel.getReviewsByShowId(it) }
-        }
+        detailViewModel.getReviewsByShowId()
 
         detailViewModel.getReviewsLiveData().observe(viewLifecycleOwner, { reviews ->
-            loadUI(reviews)
-            initRecyclerView(reviews)
+            val reviewsModel: List<Review> = reviews.map {
+                Review(it.id, it.comment, it.rating, it.showId, it.user)
+            }
+            loadUI(reviewsModel)
+            initRecyclerView(reviewsModel)
         })
 
         detailViewModel.getPostReviewResultLiveData().observe(viewLifecycleOwner, { isSuccesful ->
             if (isSuccesful) {
-                showId?.let { detailViewModel.getReviewsByShowId(it) }
+                detailViewModel.getReviewsByShowId()
             }
         })
 
@@ -78,12 +66,12 @@ class ShowDetailFragment : Fragment() {
 
 
     private fun loadUI(reviews: List<Review>) {
-        binding.showName.text = showTitle
-        binding.longDescription.text = showDescription
+        binding.showName.text = detailViewModel.showTitle
+        binding.longDescription.text = detailViewModel.showDesc
 
         val options: RequestOptions = RequestOptions().centerCrop()
         this.view?.let {
-            Glide.with(it).load(showImageUrl).diskCacheStrategy(DiskCacheStrategy.NONE)
+            Glide.with(it).load(detailViewModel.imgUrl).diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true).apply(options).into(binding.showImage)
             binding.showImage.isVisible = true
         }
@@ -134,7 +122,7 @@ class ShowDetailFragment : Fragment() {
                 detailViewModel.postReview(
                     dialogBinding.ratingBarReview.rating.toInt(),
                     dialogBinding.editReviewInput.text.toString(),
-                    showId.toString()
+                    detailViewModel.showId.toString()
                 )
 
                 dialog.dismiss()

@@ -1,4 +1,4 @@
-package com.nikolapehnec
+package com.nikolapehnec.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

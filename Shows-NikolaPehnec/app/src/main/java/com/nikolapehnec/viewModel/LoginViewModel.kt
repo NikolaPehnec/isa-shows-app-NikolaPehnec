@@ -1,4 +1,4 @@
-package com.nikolapehnec
+package com.nikolapehnec.viewModel
 
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData

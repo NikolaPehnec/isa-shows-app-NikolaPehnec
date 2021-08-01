@@ -12,6 +12,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.nikolapehnec.databinding.ActivityRegisterBinding
+import com.nikolapehnec.viewModel.RegistrationViewModel
 import java.util.regex.Pattern
 
 class RegisterFragment : Fragment() {

@@ -13,6 +13,7 @@ import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
@@ -22,8 +23,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowsBinding
 import com.nikolapehnec.databinding.DialogShowsMenuBinding
 import com.nikolapehnec.model.Show
+import com.nikolapehnec.viewModel.ShowDetailsViewModelFactory
+import com.nikolapehnec.viewModel.ShowsDetailsViewModel
+import com.nikolapehnec.viewModel.ShowsViewModel
+import com.nikolapehnec.viewModel.ShowsViewModelFactory
 import java.io.File
-
 
 class ShowsFragment : Fragment() {
     private var _binding: ActivityShowsBinding? = null
@@ -34,7 +38,16 @@ class ShowsFragment : Fragment() {
     private var adapter: ShowsAdapter? = null
     private var profileImage: File? = null
 
-    private val viewModel: ShowsViewModel by viewModels()
+    private val viewModel: ShowsViewModel by viewModels {
+        ShowsViewModelFactory((activity?.application as ShowsApp).showsDatabase!!,requireContext())
+    }
+
+    private val detailViewModel: ShowsDetailsViewModel by activityViewModels() {
+        ShowDetailsViewModelFactory(
+            (activity?.application as ShowsApp).showsDatabase!!,
+            requireContext()
+        )
+    }
 
     private val cameraPermissionForProfilePicture =
         preparePermissionsContract(onPermissionsGranted = {
@@ -85,8 +98,27 @@ class ShowsFragment : Fragment() {
             initRecyclerView()
         }
 
-        viewModel.getShowsLiveData().observe(viewLifecycleOwner, { shows ->
-            updateShows(shows)
+        viewModel.getShowsEntityLiveData().observe(viewLifecycleOwner, { shows ->
+            if (shows != null) {
+                if (shows.size == 0) {
+                    binding.showsRecycler.isVisible = false
+                    binding.noShowsLayout.isVisible = true
+                } else {
+                    binding.showsRecycler.isVisible = true
+                    binding.noShowsLayout.isVisible = false
+                    updateShows(shows.map {
+                        Show(
+                            it.id,
+                            it.avgRating,
+                            it.description,
+                            it.imgUrl,
+                            it.numOfReviews,
+                            it.title
+                        )
+                    })
+                }
+            }
+
         })
 
         viewModel.getShows()
@@ -124,14 +156,11 @@ class ShowsFragment : Fragment() {
         adapter = ShowsAdapter(emptyList()) { id, title, description, imageurl ->
             run {
                 ShowsFragmentDirections.actionShowToDetail(id.toInt()).also { action ->
+                    detailViewModel.showId=id.toInt()
+                    detailViewModel.showTitle=title
+                    detailViewModel.showDesc=description
+                    detailViewModel.imgUrl=imageurl
 
-                    requireActivity().supportFragmentManager.setFragmentResult(
-                        "showId",
-                        bundleOf(
-                            "showId" to id, "showTitle" to title, "showDesc" to description,
-                            "showImg" to imageurl
-                        )
-                    )
                     findNavController().navigate(action)
                 }
             }
@@ -150,12 +179,10 @@ class ShowsFragment : Fragment() {
 
         adapter = ShowsAdapter(emptyList()) { id, title, description, imageurl ->
             run {
-                setFragmentResult(
-                    "showId", bundleOf(
-                        "showId" to id, "showTitle" to title, "showDesc" to description,
-                        "showImg" to imageurl
-                    )
-                )
+                detailViewModel.showId=id.toInt()
+                detailViewModel.showTitle=title
+                detailViewModel.showDesc=description
+                detailViewModel.imgUrl=imageurl
                 navHostFragment.navController.navigate(R.id.showDetail)
             }
         }
