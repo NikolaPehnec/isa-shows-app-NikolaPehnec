@@ -13,19 +13,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    val detailViewModel: ShowsDetailsSharedViewModel by viewModels {
-        ShowDetailsViewModelFactory(
-            (application as ShowsApp).showsDatabase!!,
-            this
-        )
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         supportActionBar?.hide()
         setContentView(binding.root)
 
-        ApiModule.initRetrofit(applicationContext.getSharedPreferences("1", Context.MODE_PRIVATE))
+        ApiModule.initRetrofit(getPreferences(Context.MODE_PRIVATE))
     }
 }

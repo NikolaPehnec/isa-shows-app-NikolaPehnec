@@ -39,6 +39,7 @@ class LoginViewModel : ViewModel() {
                         this.putBoolean("registerSuccessful", false)
                         this.putString("email", response.body()?.user?.email)
                         this.putString("user_id", response.body()?.user?.id.toString())
+                        this.putString("imgUrl", response.body()?.user?.imageUrl)
                         this.apply()
                     }
 

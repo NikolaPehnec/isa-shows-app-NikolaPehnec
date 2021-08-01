@@ -43,4 +43,5 @@
     <string name="email">email</string>
     <string name="user_id">user_id</string>
     <string name="messageRegisterSuccessful">Register successful!</string>
+    <string name="imgUrl">imgUrl</string>
 </resources>

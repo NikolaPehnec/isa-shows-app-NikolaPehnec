@@ -16,7 +16,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -90,12 +89,7 @@ class ShowsViewModel(
     }
 
 
-    fun sendPicture(
-        id_user: String,
-        email: String,
-        imgPath: String,
-        sharedPreferences: SharedPreferences
-    ) {
+    fun sendPicture(imgPath: String, sharedPreferences: SharedPreferences) {
         //val userId: RequestBody = id_user.toRequestBody("multipart/form-data".toMediaTypeOrNull())
         //val fullName: RequestBody = email.toRequestBody("multipart/form-data".toMediaTypeOrNull())
 
@@ -112,6 +106,7 @@ class ShowsViewModel(
 
                 with(sharedPreferences.edit()) {
                     this.putString("imgUrl", response.body()?.user?.imageUrl)
+                    this.apply()
                 }
             }
 

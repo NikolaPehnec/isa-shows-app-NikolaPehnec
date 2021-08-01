@@ -17,6 +17,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowsBinding
 import com.nikolapehnec.databinding.DialogShowsMenuBinding
@@ -72,7 +73,7 @@ class ShowsFragment : Fragment() {
         val email = sharedPref?.getString(getString(R.string.email), "")
 
         if (id != null && email != null && profileImage != null) {
-            viewModel.sendPicture(id, email, profileImage!!.path, sharedPref!!)
+            viewModel.sendPicture(profileImage!!.path, sharedPref!!)
         }
     })
 
@@ -126,12 +127,9 @@ class ShowsFragment : Fragment() {
     }
 
     private fun populateUI() {
-        if (BitmapFactory.decodeFile(profileImage?.path) != null && FileUtil.getImageFile(
-                requireContext()
-            ) != null
-        ) {
-            profileImage = FileUtil.getImageFile(requireContext())
-            binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        val imgUrl = sharedPref?.getString(getString(R.string.imgUrl), "null")
+        if (imgUrl != "null"){
+            binding.profilePicture?.let { Glide.with(this).load(imgUrl).into(it) }
         }
     }
 
@@ -201,12 +199,9 @@ class ShowsFragment : Fragment() {
         dialog.setContentView(dialogBinding.root)
         dialogBinding.userEmail.text = sharedPref?.getString(getString(R.string.username), "")
 
-        if (BitmapFactory.decodeFile(profileImage?.path) != null && FileUtil.getImageFile(
-                requireContext()
-            ) != null
-        ) {
-            profileImage = FileUtil.getImageFile(requireContext())
-            dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        val imgUrl = sharedPref?.getString(getString(R.string.imgUrl), "null")
+        if (imgUrl != "null"){
+            dialogBinding.profilePicture.let { Glide.with(this).load(imgUrl).into(it) }
         }
 
         initBottomSheetListeners(dialogBinding, dialog)
