@@ -44,10 +44,7 @@ class RegisterFragment : Fragment() {
                 if (isRegisterSuccessful) {
                     Toast.makeText(context, "USPJEŠNA REGISTRACIJA", Toast.LENGTH_SHORT).show()
                     val sharedPref =
-                        activity?.applicationContext?.getSharedPreferences(
-                            "1",
-                            Context.MODE_PRIVATE
-                        )
+                        activity?.getPreferences(Context.MODE_PRIVATE)
                     with(sharedPref?.edit()) {
                         this?.putBoolean(getString(R.string.registerSuccessful), true)
                         this?.apply()

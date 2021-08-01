@@ -13,8 +13,8 @@ class ShowDetailsViewModelFactory(
 
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ShowsDetailsViewModel::class.java)) {
-            return ShowsDetailsViewModel(database,context) as T
+        if (modelClass.isAssignableFrom(ShowsDetailsSharedViewModel::class.java)) {
+            return ShowsDetailsSharedViewModel(database,context) as T
         }
 
         throw IllegalArgumentException("Radi samo sa ShowsDetailViewModel klasama")

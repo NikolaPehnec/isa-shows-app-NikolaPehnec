@@ -1,5 +1,6 @@
 package com.nikolapehnec
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +17,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowDetailsBinding
 import com.nikolapehnec.databinding.DialogAddReviewBinding
 import com.nikolapehnec.model.Review
-import com.nikolapehnec.viewModel.ShowsDetailsViewModel
+import com.nikolapehnec.viewModel.ShowsDetailsSharedViewModel
 
 class ShowDetailFragment : Fragment() {
     private var _binding: ActivityShowDetailsBinding? = null
@@ -24,7 +25,7 @@ class ShowDetailFragment : Fragment() {
     private var adapter: ReviewsAdapter? = null
 
     //Ne treba factory jer je vec kreiran u ShowsFragmentu
-    private val detailViewModel: ShowsDetailsViewModel by activityViewModels()
+    private val detailViewModel: ShowsDetailsSharedViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,7 +44,7 @@ class ShowDetailFragment : Fragment() {
 
         detailViewModel.getReviewsLiveData().observe(viewLifecycleOwner, { reviews ->
             val reviewsModel: List<Review> = reviews.map {
-                Review(it.id, it.comment, it.rating, it.showId, it.user)
+                Review(it.id.toString(), it.comment, it.rating, it.showId.toInt(), it.user)
             }
             loadUI(reviewsModel)
             initRecyclerView(reviewsModel)
@@ -122,7 +123,8 @@ class ShowDetailFragment : Fragment() {
                 detailViewModel.postReview(
                     dialogBinding.ratingBarReview.rating.toInt(),
                     dialogBinding.editReviewInput.text.toString(),
-                    detailViewModel.showId.toString()
+                    detailViewModel.showId.toString(),
+                    activity?.getPreferences(Context.MODE_PRIVATE)!!
                 )
 
                 dialog.dismiss()

@@ -27,8 +27,8 @@ interface ShowsApiService {
     @Multipart
     @PUT("/users")
     fun updateImage(
-        @Part("id") id: RequestBody,
-        @Part("email") email: RequestBody,
+       // @Part("id") id: RequestBody,
+       // @Part("email") email: RequestBody,
         @Part image_url: MultipartBody.Part
     ): Call<LoginResponse>
 }

@@ -1,6 +1,7 @@
 package com.nikolapehnec.viewModel
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -89,9 +90,14 @@ class ShowsViewModel(
     }
 
 
-    fun sendPicture(id_user: String, email: String, imgPath: String) {
-        val userId: RequestBody = id_user.toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        val fullName: RequestBody = email.toRequestBody("multipart/form-data".toMediaTypeOrNull())
+    fun sendPicture(
+        id_user: String,
+        email: String,
+        imgPath: String,
+        sharedPreferences: SharedPreferences
+    ) {
+        //val userId: RequestBody = id_user.toRequestBody("multipart/form-data".toMediaTypeOrNull())
+        //val fullName: RequestBody = email.toRequestBody("multipart/form-data".toMediaTypeOrNull())
 
         val file: File = File(imgPath)
         val requestFile: RequestBody =
@@ -99,10 +105,14 @@ class ShowsViewModel(
         var profilePic = MultipartBody.Part.createFormData("image", file.name, requestFile)
 
 
-        val call: Call<LoginResponse> = ApiModule.retrofit.updateImage(userId, fullName, profilePic)
+        val call: Call<LoginResponse> = ApiModule.retrofit.updateImage(profilePic)
         call.enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 //mozes dodat boolean za obavijesti na ekranu
+
+                with(sharedPreferences.edit()) {
+                    this.putString("imgUrl", response.body()?.user?.imageUrl)
+                }
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {

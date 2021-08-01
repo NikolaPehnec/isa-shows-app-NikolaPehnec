@@ -35,7 +35,7 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = ActivityLoginBinding.inflate(inflater, container, false)
-        sharedPref = activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+        sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
         return binding.root
     }
 
@@ -86,7 +86,7 @@ class LoginFragment : Fragment() {
 
     private fun checkIfSignedIn() {
         val sharedPref =
-            activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+            activity?.getPreferences(Context.MODE_PRIVATE)
         if (sharedPref?.getBoolean(getString(R.string.remember_me), false) == true) {
             findNavController().navigate(R.id.actionLoginToShows)
         }
@@ -94,7 +94,7 @@ class LoginFragment : Fragment() {
 
     private fun checkIfRegisterSuccessful() {
         val sharedPref =
-            activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+            activity?.getPreferences(Context.MODE_PRIVATE)
         if (sharedPref?.getBoolean(getString(R.string.registerSuccessful), false) == true) {
             binding.loginTitle.text = getString(R.string.registerSuccessful)
             binding.registerButton.isVisible = false

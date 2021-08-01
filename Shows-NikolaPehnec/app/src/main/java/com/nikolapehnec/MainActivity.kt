@@ -7,13 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import com.nikolapehnec.databinding.ActivityMainBinding
 import com.nikolapehnec.networking.ApiModule
 import com.nikolapehnec.viewModel.ShowDetailsViewModelFactory
-import com.nikolapehnec.viewModel.ShowsDetailsViewModel
+import com.nikolapehnec.viewModel.ShowsDetailsSharedViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    val detailViewModel: ShowsDetailsViewModel by viewModels {
+    val detailViewModel: ShowsDetailsSharedViewModel by viewModels {
         ShowDetailsViewModelFactory(
             (application as ShowsApp).showsDatabase!!,
             this

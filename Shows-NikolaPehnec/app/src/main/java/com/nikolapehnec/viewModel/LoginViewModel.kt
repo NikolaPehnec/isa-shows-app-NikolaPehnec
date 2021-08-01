@@ -31,15 +31,15 @@ class LoginViewModel : ViewModel() {
                     val tokenType = response.headers()["token-type"]
                     val uid = response.headers()["uid"]
 
-                    with(sharedPref?.edit()) {
-                        this?.putString("loginSuccessful", accessToken)
-                        this?.putString("tokentype", tokenType)
-                        this?.putString("uid", uid)
-                        this?.putString("client", client)
-                        this?.putBoolean("registerSuccessful", false)
-                        this?.putString("email", response.body()?.user?.email)
-                        this?.putString("user_id", response.body()?.user?.id.toString())
-                        this?.apply()
+                    with(sharedPref.edit()) {
+                        this.putString("loginSuccessful", accessToken)
+                        this.putString("tokentype", tokenType)
+                        this.putString("uid", uid)
+                        this.putString("client", client)
+                        this.putBoolean("registerSuccessful", false)
+                        this.putString("email", response.body()?.user?.email)
+                        this.putString("user_id", response.body()?.user?.id.toString())
+                        this.apply()
                     }
 
                     loginResultLiveData.value = response.isSuccessful

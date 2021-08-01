@@ -13,7 +13,7 @@ data class Review(
     @SerialName("id")
     val id: String,
     @SerialName("comment")
-    val comment: String,
+    val comment: String?,
     @SerialName("rating")
     val rating: Int,
     @SerialName("show_id")

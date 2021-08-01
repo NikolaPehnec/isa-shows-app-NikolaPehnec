@@ -9,7 +9,7 @@ import com.nikolapehnec.model.ShowEntity
 
 @Database(
     entities = [ShowEntity::class, ReviewEntity::class],
-    version = 1
+    version = 3
 )
 abstract class ShowsDatabase : RoomDatabase() {
 
