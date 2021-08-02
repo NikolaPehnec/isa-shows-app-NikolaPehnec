@@ -237,4 +237,9 @@ class ShowsFragment : Fragment() {
             cameraPermissionForProfilePicture.launch(arrayOf(android.Manifest.permission.CAMERA))
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

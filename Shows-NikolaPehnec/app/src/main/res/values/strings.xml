@@ -44,4 +44,6 @@
     <string name="user_id">user_id</string>
     <string name="messageRegisterSuccessful">Register successful!</string>
     <string name="imgUrl">imgUrl</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

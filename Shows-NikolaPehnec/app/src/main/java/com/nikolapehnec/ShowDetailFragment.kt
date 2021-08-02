@@ -144,5 +144,10 @@ class ShowDetailFragment : Fragment() {
         dialog.show()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 
 }
