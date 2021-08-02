@@ -1,11 +1,7 @@
 package com.nikolapehnec
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import com.nikolapehnec.databinding.ViewShowItemBinding
 import com.nikolapehnec.model.Show
 
 class ShowsAdapter(
@@ -14,9 +10,14 @@ class ShowsAdapter(
 ) : RecyclerView.Adapter<ShowsAdapter.ShowViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShowViewHolder {
-        var binding = ViewShowItemBinding.inflate(LayoutInflater.from(parent.context))
+        // var binding = ViewShowItemBinding.inflate(LayoutInflater.from(parent.context), parent)
+        val showCardView = ShowCardView(parent.context)
+        /*showCardView.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )*/
 
-        return ShowViewHolder(binding)
+        return ShowViewHolder(showCardView)
     }
 
     override fun onBindViewHolder(holder: ShowViewHolder, position: Int) {
@@ -33,20 +34,19 @@ class ShowsAdapter(
     }
 
 
-    inner class ShowViewHolder(private val binding: ViewShowItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    inner class ShowViewHolder(private val showCardView: ShowCardView) :
+        RecyclerView.ViewHolder(showCardView.rootView) {
 
         fun bind(item: Show) {
-            binding.showName.text = item.title
-            binding.showDescription.text = item.description
+            showCardView.setTitle(item.title)
+            showCardView.setDescription(item.description)
+            showCardView.setImage(item.imgUrl)
 
-            val options: RequestOptions = RequestOptions().centerCrop()
-            Glide.with(itemView).load(item.imgUrl).apply(options).into(binding.showImage)
+            showCardView.setClickListener(
+                onClickCallback,
+                item.id, item.title, item.description!!, item.imgUrl
+            )
 
-            if (item.description == null) item.description = ""
-            binding.root.setOnClickListener {
-                onClickCallback(item.id, item.title, item.description!!, item.imgUrl)
-            }
         }
     }
 
