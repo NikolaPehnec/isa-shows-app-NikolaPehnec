@@ -7,7 +7,9 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -17,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import com.nikolapehnec.databinding.ActivityLoginBinding
 import com.nikolapehnec.viewModel.LoginViewModel
 import java.util.regex.Pattern
+
 
 class LoginFragment : Fragment() {
     private var _binding: ActivityLoginBinding? = null
@@ -44,57 +47,44 @@ class LoginFragment : Fragment() {
 
         disabledButton = true
         initListeners()
-        initLoginListeners()
         checkIfSignedIn()
         checkIfRegisterSuccessful()
 
         viewModel.getloginResultLiveData().observe(this.viewLifecycleOwner) { isLoginSuccessful ->
+
+            binding.progressCircular.isVisible = false
+            activity?.getWindow()?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
             if (isLoginSuccessful) {
-                Toast.makeText(context, "USPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.loginSuccesfulMess), Toast.LENGTH_SHORT)
+                    .show()
                 findNavController().navigate(R.id.actionLoginToShows)
             } else {
-                Toast.makeText(context, "NEUSPJEŠAN LOGIN", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    }
-
-    private fun initLoginListeners(){
-        binding.apply {
-            loginButton.setOnClickListener {
-
-                sharedPref?.let { sharedPref ->
-                    viewModel.login(
-                        editEmailInput.text.toString(),
-                        editPasswordInput.text.toString(),
-                        sharedPref
-                    )
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle(getString(R.string.loginUnSuccesful))
+                if (viewModel.getMessage() != null) {
+                    builder.setMessage(viewModel.getMessage())
+                } else {
+                    builder.setMessage(getString(R.string.loginUnSuccesfulMess))
+                }
+                builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
                 }
 
-                with(sharedPref?.edit()) {
-                    this?.putString(
-                        getString(R.string.username),
-                        editEmailInput.text.toString()
-                    )
-                    this?.putBoolean(getString(R.string.remember_me), rememberMeCB.isChecked)
-                    this?.putBoolean(getString(R.string.registerSuccessful), false)
-                    this?.apply()
-                }
+                builder.show()
             }
+
+
         }
     }
+
 
     private fun checkIfSignedIn() {
-        val sharedPref =
-            activity?.getPreferences(Context.MODE_PRIVATE)
         if (sharedPref?.getBoolean(getString(R.string.remember_me), false) == true) {
             findNavController().navigate(R.id.actionLoginToShows)
         }
     }
 
     private fun checkIfRegisterSuccessful() {
-        val sharedPref =
-            activity?.getPreferences(Context.MODE_PRIVATE)
         if (sharedPref?.getBoolean(getString(R.string.registerSuccessful), false) == true) {
             binding.loginTitle.text = getString(R.string.registerSuccessful)
             binding.registerButton.isVisible = false
@@ -111,6 +101,55 @@ class LoginFragment : Fragment() {
             findNavController().navigate(R.id.actionLoginToRegister)
         }
 
+        initLoginButtonListeners()
+        initEmailInputListeners()
+        initPasswordInputListeners()
+    }
+
+    private fun initLoginButtonListeners() {
+        binding.apply {
+            loginButton.setOnClickListener {
+                val networkChecker = NetworkChecker(requireContext())
+                if (!networkChecker.isOnline()) {
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setTitle(getString(R.string.notification))
+                    builder.setMessage(getString(R.string.noInternet))
+
+                    builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+                    }
+
+                    builder.show()
+                } else {
+
+                    binding.progressCircular.isVisible = true
+                    activity?.getWindow()?.setFlags(
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                    )
+
+                    sharedPref?.let { sharedPref ->
+                        viewModel.login(
+                            editEmailInput.text.toString(),
+                            editPasswordInput.text.toString(),
+                            sharedPref
+                        )
+                    }
+
+                    with(sharedPref?.edit()) {
+                        this?.putString(
+                            getString(R.string.username),
+                            editEmailInput.text.toString()
+                        )
+                        this?.putBoolean(getString(R.string.remember_me), rememberMeCB.isChecked)
+                        this?.putBoolean(getString(R.string.registerSuccessful), false)
+                        this?.apply()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initEmailInputListeners() {
         binding.editEmailInput.doAfterTextChanged {
             if (disabledButton && emailPattern.matcher(binding.editEmailInput.text.toString())
                     .matches()
@@ -145,8 +184,9 @@ class LoginFragment : Fragment() {
                 binding.emailInput.error = null
             }
         }
+    }
 
-
+    private fun initPasswordInputListeners() {
         binding.editPasswordInput.doAfterTextChanged {
             if (disabledButton && binding.editPasswordInput.text.toString()
                     .trim().length > 5 && emailPattern.matcher(binding.editEmailInput?.text.toString())
@@ -173,6 +213,5 @@ class LoginFragment : Fragment() {
                 disabledButton = true
             }
         }
-
     }
 }

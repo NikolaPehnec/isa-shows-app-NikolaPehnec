@@ -27,9 +27,11 @@
     <string name="change_profile_photo">Change profile photo</string>
     <string name="logout">Logout</string>
     <string name="logoutMessage">Are you sure you want to logout?</string>
+    <string name="noInternet">No internet connection!</string>
     <string name="notification">Notification</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="Ok">OK</string>
     <string name="noPermission">Please check your permission in settings</string>
     <string name="settings">Settings</string>
     <string name="register">Register</string>
@@ -44,6 +46,13 @@
     <string name="user_id">user_id</string>
     <string name="messageRegisterSuccessful">Register successful!</string>
     <string name="imgUrl">imgUrl</string>
+    <string name="loginSuccesfulMess">Login successful!</string>
+    <string name="registrationSuccesfulMess">Registration successful!</string>
+    <string name="loginUnSuccesfulMess">Email or password incorrect!</string>
+    <string name="loginUnSuccesful">Login unsuccessful!</string>
+    <string name="registrationUnSuccesfulMess">Registration unsuccessful!</string>
+    <string name="registrationUnSuccesfulMess2">Registration unsuccessful, try again!</string>
+    <string name="passwordNotMatched">Passwords do not match</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
