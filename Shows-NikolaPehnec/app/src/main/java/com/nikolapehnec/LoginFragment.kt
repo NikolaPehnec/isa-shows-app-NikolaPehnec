@@ -72,8 +72,6 @@ class LoginFragment : Fragment() {
 
                 builder.show()
             }
-
-
         }
     }
 

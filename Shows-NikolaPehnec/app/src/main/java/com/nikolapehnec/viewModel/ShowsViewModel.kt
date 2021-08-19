@@ -90,9 +90,6 @@ class ShowsViewModel(
 
 
     fun sendPicture(imgPath: String, sharedPreferences: SharedPreferences) {
-        //val userId: RequestBody = id_user.toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        //val fullName: RequestBody = email.toRequestBody("multipart/form-data".toMediaTypeOrNull())
-
         val file: File = File(imgPath)
         val requestFile: RequestBody =
             file.asRequestBody("multipart/form-data".toMediaTypeOrNull())

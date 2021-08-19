@@ -31,7 +31,7 @@ class ShowCardView @JvmOverloads constructor(
     }
 
     fun setImage(imgUrl: String) {
-        Glide.with(this).load(imgUrl).into(binding.showImage)
+            Glide.with(this).load(imgUrl).into(binding.showImage)
     }
 
     fun setClickListener(

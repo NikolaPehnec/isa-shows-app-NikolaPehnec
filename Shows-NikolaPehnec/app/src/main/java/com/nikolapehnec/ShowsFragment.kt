@@ -10,12 +10,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -36,6 +38,8 @@ class ShowsFragment : Fragment() {
     private var sharedPref: SharedPreferences? = null
     private var adapter: ShowsAdapter? = null
     private var profileImage: File? = null
+
+    private var landscapeOrientation: Boolean = true
 
     private val viewModel: ShowsViewModel by viewModels {
         ShowsViewModelFactory((activity?.application as ShowsApp).showsDatabase!!, requireContext())
@@ -118,8 +122,10 @@ class ShowsFragment : Fragment() {
                 }
             }
 
+            binding.progressCircular?.isVisible = false
         })
 
+        binding.progressCircular?.isVisible = true
         viewModel.getShows()
 
         initListeners()
@@ -128,12 +134,14 @@ class ShowsFragment : Fragment() {
 
     private fun populateUI() {
         val imgUrl = sharedPref?.getString(getString(R.string.imgUrl), "null")
-        if (imgUrl != "null"){
+        if (imgUrl != "null") {
             binding.profilePicture?.let { Glide.with(this).load(imgUrl).into(it) }
         }
     }
 
     private fun updateShows(shows: List<Show>) {
+        if (adapter?.itemCount?.compareTo(0) != 0) return
+
         adapter?.setItems(shows)
 
         if (adapter?.itemCount?.compareTo(0) == 0) {
@@ -191,6 +199,34 @@ class ShowsFragment : Fragment() {
         binding.profilePicture?.setOnClickListener {
             showBottomSheet()
         }
+
+        binding.orientationFab?.setOnClickListener {
+            if (landscapeOrientation) {
+                binding.orientationFab?.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.ic_fab_vertical,
+                        null
+                    )
+                )
+                binding.showsRecycler.layoutManager = GridLayoutManager(requireContext(), 2)
+                adapter?.verticalLayout()
+                landscapeOrientation = false
+            } else {
+                binding.orientationFab?.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.ic_fab_landscape,
+                        null
+                    )
+                )
+                adapter?.horizontalLayout()
+
+                binding.showsRecycler.layoutManager =
+                    LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+                landscapeOrientation = true
+            }
+        }
     }
 
     private fun showBottomSheet() {
@@ -200,7 +236,7 @@ class ShowsFragment : Fragment() {
         dialogBinding.userEmail.text = sharedPref?.getString(getString(R.string.username), "")
 
         val imgUrl = sharedPref?.getString(getString(R.string.imgUrl), "null")
-        if (imgUrl != "null"){
+        if (imgUrl != "null") {
             dialogBinding.profilePicture.let { Glide.with(this).load(imgUrl).into(it) }
         }
 
@@ -226,7 +262,7 @@ class ShowsFragment : Fragment() {
                     findNavController().navigate(R.id.actionLogout)
                 }
             }
-            builder.setNegativeButton(getString(R.string.no)) { _, _ ->
+            builder.setNegativeButton(getString(R.string.cancel)) { _, _ ->
                 bottomSheetDialog.dismiss()
             }
 
