@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/showDetail"
         android:name="com.nikolapehnec.ShowDetailFragment"
-        tools:layout="@layout/activity_show_details" />
+        tools:layout="@layout/fragment_show_details" />
 
 
 </navigation>

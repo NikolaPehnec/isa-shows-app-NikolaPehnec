@@ -88,6 +88,30 @@ class ShowsViewModel(
         }
     }
 
+    fun getTopRatedShows(){
+        ApiModule.retrofit.getTopRatedShows()
+            .enqueue(object : Callback<ShowResponse> {
+                override fun onResponse(
+                    call: Call<ShowResponse>,
+                    response: Response<ShowResponse>
+                ) {
+                    showEntityLiveData.value = response.body()?.show?.map {
+                        ShowEntity(
+                            it.id,
+                            it.title,
+                            it.avgRating,
+                            it.description,
+                            it.imgUrl,
+                            it.numOfReviews
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<ShowResponse>, t: Throwable) {
+                }
+            })
+    }
+
 
     fun sendPicture(imgPath: String, sharedPreferences: SharedPreferences) {
         val file: File = File(imgPath)

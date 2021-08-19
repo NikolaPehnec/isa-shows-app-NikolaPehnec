@@ -16,13 +16,13 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.nikolapehnec.databinding.ActivityLoginBinding
+import com.nikolapehnec.databinding.FragmentLoginBinding
 import com.nikolapehnec.viewModel.LoginViewModel
 import java.util.regex.Pattern
 
 
 class LoginFragment : Fragment() {
-    private var _binding: ActivityLoginBinding? = null
+    private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
 
     private var disabledButton: Boolean = true
@@ -37,7 +37,7 @@ class LoginFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = ActivityLoginBinding.inflate(inflater, container, false)
+        _binding = FragmentLoginBinding.inflate(inflater, container, false)
         sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
         return binding.root
     }

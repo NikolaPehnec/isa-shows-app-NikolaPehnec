@@ -51,9 +51,12 @@
     <string name="registrationSuccesfulMess">Registration successful!</string>
     <string name="loginUnSuccesfulMess">Email or password incorrect!</string>
     <string name="loginUnSuccesful">Login unsuccessful!</string>
+    <string name="postingReviewUnsuccesful">Posting a review unsuccessful!</string>
+    <string name="postingReviewUnsuccesfuMess">Posting a review unsuccessful, try again!</string>
     <string name="registrationUnSuccesfulMess">Registration unsuccessful!</string>
     <string name="registrationUnSuccesfulMess2">Registration unsuccessful, try again!</string>
     <string name="passwordNotMatched">Passwords do not match</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ratingMandatory">Rating is mandatory!</string>
 </resources>

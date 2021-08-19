@@ -20,7 +20,7 @@
     <fragment
         android:id="@+id/login"
         android:name="com.nikolapehnec.LoginFragment"
-        tools:layout="@layout/activity_login">
+        tools:layout="@layout/fragment_login">
 
         <action
             android:id="@+id/actionLoginToShows"
@@ -38,7 +38,7 @@
     <fragment
         android:id="@+id/register"
         android:name="com.nikolapehnec.RegisterFragment"
-        tools:layout="@layout/activity_register" />
+        tools:layout="@layout/fragment_register" />
 
     <fragment
         android:id="@+id/shows"
@@ -59,7 +59,7 @@
     <fragment
         android:id="@+id/showDetail"
         android:name="com.nikolapehnec.ShowDetailFragment"
-        tools:layout="@layout/activity_show_details">
+        tools:layout="@layout/fragment_show_details">
 
         <argument
             android:name="showId"

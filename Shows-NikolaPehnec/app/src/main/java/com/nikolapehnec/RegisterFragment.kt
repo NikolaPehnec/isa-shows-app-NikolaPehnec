@@ -14,12 +14,12 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.nikolapehnec.databinding.ActivityRegisterBinding
+import com.nikolapehnec.databinding.FragmentRegisterBinding
 import com.nikolapehnec.viewModel.RegistrationViewModel
 import java.util.regex.Pattern
 
 class RegisterFragment : Fragment() {
-    private var _binding: ActivityRegisterBinding? = null
+    private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
 
     private var disabledButton: Boolean = true
@@ -33,7 +33,7 @@ class RegisterFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = ActivityRegisterBinding.inflate(inflater, container, false)
+        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
         return binding.root
     }
 

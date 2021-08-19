@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.nikolapehnec.Constants
 import com.nikolapehnec.NetworkChecker
 import com.nikolapehnec.db.ShowsDatabase
 import com.nikolapehnec.model.*
@@ -26,6 +27,12 @@ class ShowsDetailsSharedViewModel(
     var imgUrl: String = ""
     var dbReviewsCached: List<ReviewEntity>? = null
     val networkChecker = NetworkChecker(context)
+
+    private var message: String? = ""
+
+    fun getMessage(): String? {
+        return message
+    }
 
     private val reviewLiveData: MutableLiveData<List<ReviewEntity>> by lazy {
         MutableLiveData<List<ReviewEntity>>()
@@ -113,6 +120,9 @@ class ShowsDetailsSharedViewModel(
                         response: Response<SingleReviewResponse>
                     ) {
                         postReviewResultLiveData.value = response.isSuccessful
+                        if(!response.isSuccessful){
+                            message = response.errorBody()?.string()?.substringAfter("errors\":[\"")
+                        }
                     }
 
                     override fun onFailure(call: Call<SingleReviewResponse>, t: Throwable) {
@@ -121,9 +131,9 @@ class ShowsDetailsSharedViewModel(
                 })
         } else {
             Executors.newSingleThreadExecutor().execute {
-                val userId: Int? = sharedPref.getString("user_id", "0")?.toInt()
-                val email: String? = sharedPref.getString("email", "0")
-                val imgUrl: String? = sharedPref.getString("imgUrl", null)
+                val userId: Int? = sharedPref.getString(Constants.USER_ID, "0")?.toInt()
+                val email: String? = sharedPref.getString(Constants.EMAIL, "0")
+                val imgUrl: String? = sharedPref.getString(Constants.IMG_URL, null)
 
                 val review = ReviewEntity(
                     0,

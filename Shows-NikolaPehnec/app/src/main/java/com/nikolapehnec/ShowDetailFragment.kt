@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -14,13 +15,13 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.nikolapehnec.databinding.ActivityShowDetailsBinding
 import com.nikolapehnec.databinding.DialogAddReviewBinding
+import com.nikolapehnec.databinding.FragmentShowDetailsBinding
 import com.nikolapehnec.model.Review
 import com.nikolapehnec.viewModel.ShowsDetailsSharedViewModel
 
 class ShowDetailFragment : Fragment() {
-    private var _binding: ActivityShowDetailsBinding? = null
+    private var _binding: FragmentShowDetailsBinding? = null
     private val binding get() = _binding!!
     private var adapter: ReviewsAdapter? = null
 
@@ -32,7 +33,7 @@ class ShowDetailFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ActivityShowDetailsBinding.inflate(inflater, container, false)
+        _binding = FragmentShowDetailsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -40,9 +41,12 @@ class ShowDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        checkInternetConnection()
         detailViewModel.getReviewsByShowId()
 
         detailViewModel.getReviewsLiveData().observe(viewLifecycleOwner, { reviews ->
+            binding.progressCircular.isVisible = false
+
             val reviewsModel: List<Review> = reviews.map {
                 Review(it.id.toString(), it.comment, it.rating, it.showId.toInt(), it.user)
             }
@@ -51,8 +55,22 @@ class ShowDetailFragment : Fragment() {
         })
 
         detailViewModel.getPostReviewResultLiveData().observe(viewLifecycleOwner, { isSuccesful ->
+            binding.progressCircular.isVisible = false
+
             if (isSuccesful) {
                 detailViewModel.getReviewsByShowId()
+            } else {
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle(getString(R.string.postingReviewUnsuccesful))
+                if (detailViewModel.getMessage() != null) {
+                    builder.setMessage(detailViewModel.getMessage())
+                } else {
+                    builder.setMessage(getString(R.string.postingReviewUnsuccesfuMess))
+                }
+                builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+                }
+
+                builder.show()
             }
         })
 
@@ -118,8 +136,14 @@ class ShowDetailFragment : Fragment() {
 
         dialogBinding.submitButton.setOnClickListener {
             if (dialogBinding.ratingBarReview.rating.compareTo(0.0) == 0) {
-                Toast.makeText(requireContext(), "Rating is mandatory!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.ratingMandatory),
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
+                checkInternetConnection()
+
                 detailViewModel.postReview(
                     dialogBinding.ratingBarReview.rating.toInt(),
                     dialogBinding.editReviewInput.text.toString(),
@@ -142,6 +166,22 @@ class ShowDetailFragment : Fragment() {
         }
 
         dialog.show()
+    }
+
+    private fun checkInternetConnection() {
+        val networkChecker = NetworkChecker(requireContext())
+        if (!networkChecker.isOnline()) {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle(getString(R.string.notification))
+            builder.setMessage(getString(R.string.noInternet))
+
+            builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+            }
+
+            builder.show()
+        } else {
+            binding.progressCircular.isVisible = true
+        }
     }
 
     override fun onDestroyView() {

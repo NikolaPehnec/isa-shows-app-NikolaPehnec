@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
@@ -40,6 +41,8 @@ class ShowsFragment : Fragment() {
     private var profileImage: File? = null
 
     private var landscapeOrientation: Boolean = true
+    private var topRatedShows: Boolean = false
+    private var changeShows: Boolean = false
 
     private val viewModel: ShowsViewModel by viewModels {
         ShowsViewModelFactory((activity?.application as ShowsApp).showsDatabase!!, requireContext())
@@ -130,6 +133,7 @@ class ShowsFragment : Fragment() {
 
         initListeners()
         populateUI()
+        checkInternetConnection()
     }
 
     private fun populateUI() {
@@ -140,7 +144,7 @@ class ShowsFragment : Fragment() {
     }
 
     private fun updateShows(shows: List<Show>) {
-        if (adapter?.itemCount?.compareTo(0) != 0) return
+        if (!changeShows && adapter?.itemCount?.compareTo(0) != 0) return
 
         adapter?.setItems(shows)
 
@@ -151,6 +155,8 @@ class ShowsFragment : Fragment() {
             binding.showsRecycler.isVisible = true
             binding.noShowsLayout.isVisible = false
         }
+
+        changeShows=false
     }
 
     private fun initRecyclerView() {
@@ -200,6 +206,11 @@ class ShowsFragment : Fragment() {
             showBottomSheet()
         }
 
+        initTopRatedListeners()
+        initOrientationListeners()
+    }
+
+    private fun initOrientationListeners(){
         binding.orientationFab?.setOnClickListener {
             if (landscapeOrientation) {
                 binding.orientationFab?.setImageDrawable(
@@ -225,6 +236,34 @@ class ShowsFragment : Fragment() {
                 binding.showsRecycler.layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
                 landscapeOrientation = true
+            }
+        }
+    }
+
+    private fun initTopRatedListeners(){
+        binding.topRatedShowsButton?.apply {
+            setOnClickListener {
+                changeShows=true
+
+                if (!topRatedShows) {
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                    backgroundTintList =
+                        ContextCompat.getColorStateList(requireContext(), R.color.background)
+                    iconTint = ContextCompat.getColorStateList(requireContext(), R.color.white)
+                    topRatedShows=true
+
+                    binding.progressCircular?.isVisible = true
+                    viewModel.getTopRatedShows()
+                } else {
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.background))
+                    backgroundTintList =
+                        ContextCompat.getColorStateList(requireContext(), R.color.white)
+                    iconTint = ContextCompat.getColorStateList(requireContext(), R.color.background)
+                    topRatedShows=false
+
+                    binding.progressCircular?.isVisible = true
+                    viewModel.getShows()
+                }
             }
         }
     }
@@ -271,6 +310,20 @@ class ShowsFragment : Fragment() {
 
         dialogBinding.changeProfilePhotoButton.setOnClickListener {
             cameraPermissionForProfilePicture.launch(arrayOf(android.Manifest.permission.CAMERA))
+        }
+    }
+
+    private fun checkInternetConnection(){
+        val networkChecker = NetworkChecker(requireContext())
+        if (!networkChecker.isOnline()) {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle(getString(R.string.notification))
+            builder.setMessage(getString(R.string.noInternet))
+
+            builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+            }
+
+            builder.show()
         }
     }
 
