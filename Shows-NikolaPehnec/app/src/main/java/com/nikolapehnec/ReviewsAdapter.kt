@@ -2,6 +2,7 @@ package com.nikolapehnec
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -47,6 +48,8 @@ class ReviewsAdapter(
                     .into(binding.reviewImage)
             }
             binding.reviewText.text = item.comment
+            if (item.comment.equals(""))
+                binding.reviewText.isVisible = false
             binding.reviewUsername.text = item.user.email
             binding.reviewGrade.text = item.rating.toString()
         }
