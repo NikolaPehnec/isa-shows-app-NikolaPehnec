@@ -8,8 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.BounceInterpolator
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.findNavController
 import com.nikolapehnec.databinding.FragmentSplashBinding
 
@@ -35,9 +37,14 @@ class SplashFragment : Fragment() {
                 .setInterpolator(BounceInterpolator())
                 .setDuration(1500)
                 .withEndAction {
-                    splashBinding.title.isVisible = true
+                    //provjere zbog zatvaranja aplikacije prije dovrsetka animacije
+                    if(_binding!=null) splashBinding.title.isVisible = true
                     postDelayed({
-                        findNavController().navigate(R.id.actionToLogin)
+                        try {
+                            findNavController().navigate(R.id.actionToLogin)
+                        } catch (e: IllegalStateException) {
+
+                        }
                     }, 2500)
                 }
                 .start()
@@ -66,7 +73,6 @@ class SplashFragment : Fragment() {
         animatorSet.start()
 
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
