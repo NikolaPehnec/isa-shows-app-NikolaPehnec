@@ -1,6 +1,7 @@
 package com.nikolapehnec
 
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -20,5 +21,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         ApiModule.initRetrofit(getPreferences(Context.MODE_PRIVATE))
+
+        val isTablet = resources?.getBoolean(R.bool.isTablet)
+        if (isTablet == true) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        }
     }
 }

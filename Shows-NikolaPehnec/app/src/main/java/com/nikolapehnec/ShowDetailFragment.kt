@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,6 +19,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.DialogAddReviewBinding
 import com.nikolapehnec.databinding.FragmentShowDetailsBinding
 import com.nikolapehnec.model.Review
+import com.nikolapehnec.viewModel.ShowDetailsViewModelFactory
 import com.nikolapehnec.viewModel.ShowsDetailsSharedViewModel
 
 class ShowDetailFragment : Fragment() {
@@ -26,7 +28,13 @@ class ShowDetailFragment : Fragment() {
     private var adapter: ReviewsAdapter? = null
 
     //Ne treba factory jer je vec kreiran u ShowsFragmentu
-    private val detailViewModel: ShowsDetailsSharedViewModel by activityViewModels()
+    /*private val detailViewModel: ShowsDetailsSharedViewModel by activityViewModels()*/
+    private val detailViewModel: ShowsDetailsSharedViewModel by activityViewModels() {
+        ShowDetailsViewModelFactory(
+            (activity?.application as ShowsApp).showsDatabase!!,
+            requireContext()
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,11 +55,13 @@ class ShowDetailFragment : Fragment() {
         detailViewModel.getReviewsLiveData().observe(viewLifecycleOwner, { reviews ->
             binding.progressCircular.isVisible = false
 
-            val reviewsModel: List<Review> = reviews.map {
-                Review(it.id.toString(), it.comment, it.rating, it.showId.toInt(), it.user)
+            if (reviews != null) {
+                val reviewsModel: List<Review> = reviews.map {
+                    Review(it.id.toString(), it.comment, it.rating, it.showId.toInt(), it.user)
+                }
+                loadUI(reviewsModel)
+                initRecyclerView(reviewsModel)
             }
-            loadUI(reviewsModel)
-            initRecyclerView(reviewsModel)
         })
 
         detailViewModel.getPostReviewResultLiveData().observe(viewLifecycleOwner, { isSuccesful ->
@@ -128,9 +138,23 @@ class ShowDetailFragment : Fragment() {
     }
 
     private fun showBottomSheet() {
-        val dialog = BottomSheetDialog(requireContext())
+        val dialog =
+            BottomSheetDialog(requireContext(), android.R.style.Theme_Translucent_NoTitleBar)
         val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
+
+        dialog.behavior.peekHeight = 1000
+
+        binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
+
+        dialog.setOnDismissListener {
+            binding.layout.setBackgroundColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.white
+                )
+            )
+        }
 
         dialogBinding.editReviewInput.requestFocus()
 

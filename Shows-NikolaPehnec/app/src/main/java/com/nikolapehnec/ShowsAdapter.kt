@@ -7,6 +7,7 @@ import com.nikolapehnec.model.Show
 
 class ShowsAdapter(
     private var items: List<Show>,
+    private val tablet: Boolean,
     private val onClickCallback: (String, String, String, String) -> Unit
 ) : RecyclerView.Adapter<ShowsAdapter.ShowViewHolder>() {
 
@@ -18,7 +19,7 @@ class ShowsAdapter(
     }
 
     override fun onBindViewHolder(holder: ShowViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(items[position], position, tablet)
     }
 
     override fun getItemCount(): Int {
@@ -31,18 +32,18 @@ class ShowsAdapter(
     }
 
     fun verticalLayout() {
-        landscape=false
+        landscape = false
     }
 
-    fun horizontalLayout(){
-        landscape=true
+    fun horizontalLayout() {
+        landscape = true
     }
 
 
     inner class ShowViewHolder(private val showCardView: ShowCardView) :
         RecyclerView.ViewHolder(showCardView.rootView) {
 
-        fun bind(item: Show) {
+        fun bind(item: Show, position: Int, tablet: Boolean) {
             showCardView.setTitle(item.title)
             showCardView.setDescription(item.description)
             showCardView.setImage(item.imgUrl)
@@ -51,6 +52,10 @@ class ShowsAdapter(
                 item.id, item.title, item.description!!, item.imgUrl
             )
 
+            //Prvi show odabran u tablet modeu
+            if(position==0 && tablet){
+                showCardView.performClick()
+            }
             showCardView.binding.showDescription.isVisible = landscape
         }
     }

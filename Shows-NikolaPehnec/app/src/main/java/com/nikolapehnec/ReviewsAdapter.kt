@@ -14,7 +14,7 @@ class ReviewsAdapter(
 ) : RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
-        var binding = ItemReviewBinding.inflate(LayoutInflater.from(parent.context))
+        var binding = ItemReviewBinding.inflate(LayoutInflater.from(parent.context),parent,false)
 
         return ReviewViewHolder(binding)
     }

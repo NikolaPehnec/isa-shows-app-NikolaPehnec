@@ -16,7 +16,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.concurrent.Executors
 
-class ShowsDetailsSharedViewModel(
+ class ShowsDetailsSharedViewModel(
     val database: ShowsDatabase,
     val context: Context
 ) : ViewModel() {

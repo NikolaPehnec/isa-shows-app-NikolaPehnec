@@ -156,14 +156,14 @@ class ShowsFragment : Fragment() {
             binding.noShowsLayout.isVisible = false
         }
 
-        changeShows=false
+        changeShows = false
     }
 
     private fun initRecyclerView() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(emptyList()) { id, title, description, imageurl ->
+        adapter = ShowsAdapter(emptyList(),false) { id, title, description, imageurl ->
             run {
                 ShowsFragmentDirections.actionShowToDetail(id.toInt()).also { action ->
                     detailViewModel.showId = id.toInt()
@@ -187,7 +187,7 @@ class ShowsFragment : Fragment() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(emptyList()) { id, title, description, imageurl ->
+        adapter = ShowsAdapter(emptyList(),true) { id, title, description, imageurl ->
             run {
                 detailViewModel.showId = id.toInt()
                 detailViewModel.showTitle = title
@@ -210,7 +210,7 @@ class ShowsFragment : Fragment() {
         initOrientationListeners()
     }
 
-    private fun initOrientationListeners(){
+    private fun initOrientationListeners() {
         binding.orientationFab?.setOnClickListener {
             if (landscapeOrientation) {
                 binding.orientationFab?.setImageDrawable(
@@ -240,17 +240,17 @@ class ShowsFragment : Fragment() {
         }
     }
 
-    private fun initTopRatedListeners(){
+    private fun initTopRatedListeners() {
         binding.topRatedShowsButton?.apply {
             setOnClickListener {
-                changeShows=true
+                changeShows = true
 
                 if (!topRatedShows) {
                     setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
                     backgroundTintList =
                         ContextCompat.getColorStateList(requireContext(), R.color.background)
                     iconTint = ContextCompat.getColorStateList(requireContext(), R.color.white)
-                    topRatedShows=true
+                    topRatedShows = true
 
                     binding.progressCircular?.isVisible = true
                     viewModel.getTopRatedShows()
@@ -259,7 +259,7 @@ class ShowsFragment : Fragment() {
                     backgroundTintList =
                         ContextCompat.getColorStateList(requireContext(), R.color.white)
                     iconTint = ContextCompat.getColorStateList(requireContext(), R.color.background)
-                    topRatedShows=false
+                    topRatedShows = false
 
                     binding.progressCircular?.isVisible = true
                     viewModel.getShows()
@@ -269,10 +269,20 @@ class ShowsFragment : Fragment() {
     }
 
     private fun showBottomSheet() {
-        val dialog = BottomSheetDialog(requireContext())
+        val dialog =
+            BottomSheetDialog(requireContext(), android.R.style.Theme_Translucent_NoTitleBar)
         _dialogBinding = DialogShowsMenuBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
         dialogBinding.userEmail.text = sharedPref?.getString(getString(R.string.username), "")
+
+        //inace se ne vidi dobro na tabletu
+        dialog.behavior.peekHeight = 1000
+
+        binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.gray))
+
+        dialog.setOnDismissListener {
+            binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.white))
+        }
 
         val imgUrl = sharedPref?.getString(getString(R.string.imgUrl), "null")
         if (imgUrl != "null") {
@@ -313,7 +323,7 @@ class ShowsFragment : Fragment() {
         }
     }
 
-    private fun checkInternetConnection(){
+    private fun checkInternetConnection() {
         val networkChecker = NetworkChecker(requireContext())
         if (!networkChecker.isOnline()) {
             val builder = AlertDialog.Builder(requireContext())
