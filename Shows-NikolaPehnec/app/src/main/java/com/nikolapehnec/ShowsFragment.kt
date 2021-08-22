@@ -276,7 +276,7 @@ class ShowsFragment : Fragment() {
         dialogBinding.userEmail.text = sharedPref?.getString(getString(R.string.username), "")
 
         //inace se ne vidi dobro na tabletu
-        dialog.behavior.peekHeight = 1000
+        dialog.behavior.peekHeight = 2000
 
         binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.gray))
 
