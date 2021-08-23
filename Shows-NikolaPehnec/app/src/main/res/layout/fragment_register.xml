@@ -95,6 +95,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editEmailInput"
                 android:layout_width="match_parent"
+                android:inputType="textEmailAddress"
                 android:layout_height="wrap_content"
                 android:textColor="@color/white" />
 
@@ -150,7 +151,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
             android:layout_marginBottom="20dp"
-            android:background="@drawable/ic_button_gray"
+            android:background="@drawable/button_register2_colors"
             android:enabled="false"
             android:text="@string/register"
             android:textAllCaps="false"

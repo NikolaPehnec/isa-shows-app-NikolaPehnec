@@ -161,7 +161,6 @@ class RegisterFragment : Fragment() {
                     .trim().length > 5 && emailPattern.matcher(binding.editEmailInput?.text.toString())
                     .matches() && binding.editRepeatPasswordInput.text.toString().trim().length > 5
             ) {
-                binding.registerButton.setBackgroundResource(R.drawable.ic_button_white)
                 binding.registerButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -170,8 +169,9 @@ class RegisterFragment : Fragment() {
                 )
                 binding.registerButton.isEnabled = true
                 disabledButton = false
+            } else if (binding.editPasswordInput.text.toString().trim().length > 5) {
+                binding.passwordInput.error = null
             } else if (binding.editPasswordInput.text.toString().trim().length < 6) {
-                binding.registerButton.setBackgroundResource(R.drawable.ic_button_gray)
                 binding.registerButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -179,6 +179,7 @@ class RegisterFragment : Fragment() {
                     )
                 )
                 binding.registerButton.isEnabled = false
+                binding.passwordInput.error = getString(R.string.passwordInvalid)
                 disabledButton = true
             }
         }
@@ -191,7 +192,6 @@ class RegisterFragment : Fragment() {
                 && binding.editRepeatPasswordInput.text.toString()
                     .equals(binding.editPasswordInput.text.toString())
             ) {
-                binding.registerButton.setBackgroundResource(R.drawable.ic_button_white)
                 binding.registerButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -201,20 +201,9 @@ class RegisterFragment : Fragment() {
                 binding.registerButton.isEnabled = true
                 disabledButton = false
                 binding.repeatPasswordInput.error = null
-            } else if (binding.editRepeatPasswordInput.text.toString().trim().length < 6) {
-                binding.registerButton.setBackgroundResource(R.drawable.ic_button_gray)
-                binding.registerButton.setTextColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.white
-                    )
-                )
-                binding.registerButton.isEnabled = false
-                disabledButton = true
             } else if (!binding.editRepeatPasswordInput.text.toString()
-                    .equals(binding.editPasswordInput.toString())
+                    .equals(binding.editPasswordInput.text.toString())
             ) {
-                binding.registerButton.setBackgroundResource(R.drawable.ic_button_gray)
                 binding.registerButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -224,6 +213,11 @@ class RegisterFragment : Fragment() {
                 binding.registerButton.isEnabled = false
                 disabledButton = true
                 binding.repeatPasswordInput.error = getString(R.string.passwordNotMatched)
+                //samo dobar repeat passworda, ne omoguciti gumb
+            } else if (binding.editRepeatPasswordInput.text.toString()
+                    .equals(binding.editPasswordInput.text.toString())
+            ) {
+                binding.repeatPasswordInput.error = null
             }
         }
     }

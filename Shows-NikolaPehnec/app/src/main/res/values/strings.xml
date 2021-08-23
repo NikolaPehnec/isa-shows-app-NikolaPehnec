@@ -41,6 +41,8 @@
     <string name="registerSuccessful">Register Successful</string>
     <string name="loginSuccessful">loginSuccessful</string>
     <string name="client">client</string>
+    <string name="invalidEmail">Email invalid</string>
+    <string name="passwordInvalid">Password must have more than 5 symbols</string>
     <string name="tokentype">token</string>
     <string name="uid">uid</string>
     <string name="email">email</string>

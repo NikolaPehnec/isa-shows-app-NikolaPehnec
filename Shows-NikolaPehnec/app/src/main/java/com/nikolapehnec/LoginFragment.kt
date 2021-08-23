@@ -153,7 +153,6 @@ class LoginFragment : Fragment() {
                     .matches()
                 && binding.editPasswordInput.text.toString().trim().length > 5
             ) {
-                binding.loginButton.setBackgroundResource(R.drawable.ic_button_white)
                 binding.loginButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -166,7 +165,6 @@ class LoginFragment : Fragment() {
             } else if (!disabledButton && !emailPattern.matcher(binding.editEmailInput.text.toString())
                     .matches()
             ) {
-                binding.loginButton.setBackgroundResource(R.drawable.ic_button_gray)
                 binding.loginButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -177,7 +175,7 @@ class LoginFragment : Fragment() {
                 disabledButton = true
             }
             if (!emailPattern.matcher(binding.editEmailInput.text.toString()).matches()) {
-                binding.emailInput.error = "Invalid email"
+                binding.emailInput.error = getString(R.string.invalidEmail)
             } else {
                 binding.emailInput.error = null
             }
@@ -188,9 +186,7 @@ class LoginFragment : Fragment() {
         binding.editPasswordInput.doAfterTextChanged {
             if (disabledButton && binding.editPasswordInput.text.toString()
                     .trim().length > 5 && emailPattern.matcher(binding.editEmailInput?.text.toString())
-                    .matches()
-            ) {
-                binding.loginButton.setBackgroundResource(R.drawable.ic_button_white)
+                    .matches()) {
                 binding.loginButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -199,8 +195,8 @@ class LoginFragment : Fragment() {
                 )
                 binding.loginButton.isEnabled = true
                 disabledButton = false
+                binding.passwordInput.error=null
             } else if (binding.editPasswordInput.text.toString().trim().length < 6) {
-                binding.loginButton.setBackgroundResource(R.drawable.ic_button_gray)
                 binding.loginButton.setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -208,7 +204,10 @@ class LoginFragment : Fragment() {
                     )
                 )
                 binding.loginButton.isEnabled = false
+                binding.passwordInput.error=getString(R.string.passwordInvalid)
                 disabledButton = true
+            } else if (binding.editPasswordInput.text.toString().trim().length >5){
+                binding.passwordInput.error=null
             }
         }
     }
