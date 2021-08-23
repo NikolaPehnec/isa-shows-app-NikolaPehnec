@@ -2,25 +2,32 @@ package com.nikolapehnec
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.database.Cursor
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.net.toFile
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.gms.common.util.IOUtils.copyStream
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowsBinding
 import com.nikolapehnec.databinding.DialogShowsMenuBinding
@@ -30,6 +37,7 @@ import com.nikolapehnec.viewModel.ShowsDetailsSharedViewModel
 import com.nikolapehnec.viewModel.ShowsViewModel
 import com.nikolapehnec.viewModel.ShowsViewModelFactory
 import java.io.File
+import java.io.FileOutputStream
 
 class ShowsFragment : Fragment() {
     private var _binding: ActivityShowsBinding? = null
@@ -67,21 +75,59 @@ class ShowsFragment : Fragment() {
                 )
             }
 
-            cameraContract.launch(avatarUri)
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle(getString(R.string.imageOption))
+            builder.setMessage(getString(R.string.imageOptionMess))
+
+            builder.setPositiveButton(getString(R.string.fromCamera)) { _, _ ->
+                cameraContract.launch(avatarUri)
+            }
+            builder.setNeutralButton(getString(R.string.fromMemory)) { _, _ ->
+                pickImageContract.launch("image/*")
+            }
+
+            builder.show()
         })
 
     private val cameraContract = prepareCameraContract(onSuccess = {
         profileImage = FileUtil.getImageFile(requireContext())
 
         dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
-        binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        binding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
 
-        val id = sharedPref?.getString(getString(R.string.user_id), "")
-        val email = sharedPref?.getString(getString(R.string.email), "")
-
-        if (id != null && email != null && profileImage != null) {
+        if (profileImage != null) {
             viewModel.sendPicture(profileImage!!.path, sharedPref!!)
         }
+    })
+
+    private val pickImageContract = prepareGalleryContract(onUri = {
+        if (it != null && it.path != null) {
+            if (Build.VERSION.SDK_INT < 28) {
+                dialogBinding.profilePicture.setImageBitmap(
+                    MediaStore.Images.Media.getBitmap(
+                        requireContext().contentResolver,
+                        it
+                    )
+                )
+                binding.profilePicture.setImageBitmap(
+                    MediaStore.Images.Media.getBitmap(
+                        requireContext().contentResolver,
+                        it
+                    )
+                )
+            } else {
+                val source = ImageDecoder
+                    .createSource(requireContext().contentResolver, it)
+                dialogBinding.profilePicture.setImageBitmap(ImageDecoder.decodeBitmap(source))
+                binding.profilePicture.setImageBitmap(ImageDecoder.decodeBitmap(source))
+            }
+
+            val uri = getFilePathFromUri(it)
+            var file = uri!!.toFile()
+            file = FileUtil.makeImageSmaller(file)
+            viewModel.sendPicture(file.path, sharedPref!!)
+        }
+
     })
 
     override fun onCreateView(
@@ -396,5 +442,50 @@ class ShowsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+
+    fun getFilePathFromUri(uri: Uri?): Uri? {
+        val fileName: String = getFileName(uri)
+        val file: File = File(requireContext().externalCacheDir, fileName)
+        file.createNewFile()
+        FileOutputStream(file).use { outputStream ->
+            requireContext().getContentResolver().openInputStream(uri!!).use { inputStream ->
+                copyStream(inputStream,outputStream)
+                outputStream.flush()
+            }
+        }
+        return Uri.fromFile(file)
+    }
+
+    fun getFileName(uri: Uri?): String {
+        var fileName: String? = getFileNameFromCursor(uri)
+        if (fileName == null) {
+            val fileExtension: String? = getFileExtension(uri)
+            fileName = "temp_file" + if (fileExtension != null) ".$fileExtension" else ""
+        } else if (!fileName.contains(".")) {
+            val fileExtension: String? = getFileExtension(uri)
+            fileName = "$fileName.$fileExtension"
+        }
+        return fileName
+    }
+
+    fun getFileExtension(uri: Uri?): String? {
+        val fileType: String? = requireContext().contentResolver.getType(uri!!)
+
+        return MimeTypeMap.getSingleton().getExtensionFromMimeType(fileType)
+    }
+
+    fun getFileNameFromCursor(uri: Uri?): String? {
+        val fileCursor: Cursor? = requireContext().contentResolver
+            .query(uri!!, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+        var fileName: String? = null
+        if (fileCursor != null && fileCursor.moveToFirst()) {
+            val cIndex: Int = fileCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (cIndex != -1) {
+                fileName = fileCursor.getString(cIndex)
+            }
+        }
+        return fileName
     }
 }

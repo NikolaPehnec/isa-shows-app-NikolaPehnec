@@ -42,8 +42,8 @@ class ShowsViewModel(
 
     fun getErrorMessageLiveData(): LiveData<String> {
         //inace se error pamtio i u onCreatu na povratku iz showDetaila pojavljivao
-        val err:LiveData<String> = errorMessageLiveData
-        errorMessageLiveData.value=null
+        val err: LiveData<String> = errorMessageLiveData
+        errorMessageLiveData.value = null
         return err
     }
 
@@ -137,7 +137,10 @@ class ShowsViewModel(
     }
 
 
-    fun sendPicture(imgPath: String, sharedPreferences: SharedPreferences) {
+    fun sendPicture(
+        imgPath: String?,
+        sharedPreferences: SharedPreferences,
+    ) {
         val file: File = File(imgPath)
         val requestFile: RequestBody =
             file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
@@ -156,8 +159,11 @@ class ShowsViewModel(
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                with(sharedPreferences.edit()) {
+                }
             }
         })
     }
+
 
 }

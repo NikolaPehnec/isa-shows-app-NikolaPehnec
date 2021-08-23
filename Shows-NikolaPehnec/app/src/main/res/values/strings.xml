@@ -25,12 +25,16 @@
     <string name="showID">showId</string>
     <string name="remember_me">Remember me</string>
     <string name="cancel">Cancel</string>
+    <string name="fromMemory">From memory</string>
     <string name="change_profile_photo">Change profile photo</string>
     <string name="logout">Logout</string>
     <string name="logoutMessage">Are you sure you want to logout?</string>
     <string name="noInternet">No internet connection!</string>
     <string name="notification">Notification</string>
+    <string name="imageOption">Pick an option!</string>
+    <string name="imageOptionMess">How do you want to take your profile picture?</string>
     <string name="yes">Yes</string>
+    <string name="fromCamera">From camera</string>
     <string name="no">No</string>
     <string name="Ok">OK</string>
     <string name="noPermission">Please check your permission in settings</string>
