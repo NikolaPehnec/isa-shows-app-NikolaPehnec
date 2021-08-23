@@ -53,6 +53,7 @@
     <string name="registrationSuccesfulMess">Registration successful!</string>
     <string name="loginUnSuccesfulMess">Email or password incorrect!</string>
     <string name="loginUnSuccesful">Login unsuccessful!</string>
+    <string name="loadingUnSuccesful">Loding error!</string>
     <string name="postingReviewUnsuccesful">Posting a review unsuccessful!</string>
     <string name="postingReviewUnsuccesfuMess">Posting a review unsuccessful, try again!</string>
     <string name="registrationUnSuccesfulMess">Registration unsuccessful!</string>

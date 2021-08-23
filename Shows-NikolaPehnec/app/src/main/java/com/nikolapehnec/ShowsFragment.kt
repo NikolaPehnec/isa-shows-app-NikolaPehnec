@@ -44,7 +44,7 @@ class ShowsFragment : Fragment() {
     private var topRatedShows: Boolean = false
     private var changeShows: Boolean = false
 
-    private val viewModel: ShowsViewModel by viewModels {
+    private val viewModel: ShowsViewModel by activityViewModels() {
         ShowsViewModelFactory((activity?.application as ShowsApp).showsDatabase!!, requireContext())
     }
 
@@ -105,6 +105,8 @@ class ShowsFragment : Fragment() {
         }
 
         viewModel.getShowsEntityLiveData().observe(viewLifecycleOwner, { shows ->
+            binding.progressCircular?.isVisible = false
+
             if (shows != null) {
                 if (shows.size == 0) {
                     binding.showsRecycler.isVisible = false
@@ -124,8 +126,57 @@ class ShowsFragment : Fragment() {
                     })
                 }
             }
+        })
 
+        //Ako sam koristio isti live data nije se u nekim slucajevima pozvao observe
+        viewModel.getTopRatedShowsEntityLiveData().observe(viewLifecycleOwner, { shows ->
             binding.progressCircular?.isVisible = false
+
+            if (shows != null) {
+                if (shows.size == 0) {
+                    binding.showsRecycler.isVisible = false
+                    binding.noShowsLayout.isVisible = true
+                } else {
+                    binding.showsRecycler.isVisible = true
+                    binding.noShowsLayout.isVisible = false
+                    updateShows(shows.map {
+                        Show(
+                            it.id,
+                            it.avgRating,
+                            it.description,
+                            it.imgUrl,
+                            it.numOfReviews,
+                            it.title
+                        )
+                    })
+                }
+            }
+        })
+
+        viewModel.getErrorMessageLiveData().observe(viewLifecycleOwner, { message ->
+            binding.progressCircular?.isVisible = false
+
+            if (topRatedShows == true) {
+                binding.topRatedShowsButton.apply {
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.background))
+                    backgroundTintList =
+                        ContextCompat.getColorStateList(requireContext(), R.color.white)
+                    iconTint = ContextCompat.getColorStateList(requireContext(), R.color.background)
+                }
+
+                topRatedShows = false
+
+                if (message != null) {
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setTitle(getString(R.string.loadingUnSuccesful))
+                    builder.setMessage(message)
+                    builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+                    }
+
+                    builder.show()
+                }
+
+            }
         })
 
         binding.progressCircular?.isVisible = true
@@ -163,7 +214,7 @@ class ShowsFragment : Fragment() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(emptyList(),false) { id, title, description, imageurl ->
+        adapter = ShowsAdapter(emptyList(), false) { id, title, description, imageurl ->
             run {
                 ShowsFragmentDirections.actionShowToDetail(id.toInt()).also { action ->
                     detailViewModel.showId = id.toInt()
@@ -187,7 +238,7 @@ class ShowsFragment : Fragment() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(emptyList(),true) { id, title, description, imageurl ->
+        adapter = ShowsAdapter(emptyList(), true) { id, title, description, imageurl ->
             run {
                 detailViewModel.showId = id.toInt()
                 detailViewModel.showTitle = title
@@ -241,7 +292,7 @@ class ShowsFragment : Fragment() {
     }
 
     private fun initTopRatedListeners() {
-        binding.topRatedShowsButton?.apply {
+        binding.topRatedShowsButton.apply {
             setOnClickListener {
                 changeShows = true
 
@@ -278,10 +329,15 @@ class ShowsFragment : Fragment() {
         //inace se ne vidi dobro na tabletu
         dialog.behavior.peekHeight = 2000
 
-        binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.gray))
+        binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
 
         dialog.setOnDismissListener {
-            binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.white))
+            binding.layout.setBackgroundColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.white
+                )
+            )
         }
 
         val imgUrl = sharedPref?.getString(getString(R.string.imgUrl), "null")
