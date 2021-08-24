@@ -66,7 +66,7 @@
         <item name="colorControlActivated">@color/background</item>
     </style>
 
-    <style name="ToolbarColoredBackArrow" parent="Widget.AppCompat.Toolbar">
+    <style name="ToolbarColoredBackArrow" parent="Widget.Design.CollapsingToolbar">
         <item name="android:textColorSecondary">@color/black</item>
     </style>
 

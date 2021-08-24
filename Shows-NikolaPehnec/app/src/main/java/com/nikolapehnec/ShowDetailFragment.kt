@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.DialogAddReviewBinding
 import com.nikolapehnec.databinding.FragmentShowDetailsBinding
@@ -87,10 +88,35 @@ class ShowDetailFragment : Fragment() {
         if (context?.resources?.getBoolean(R.bool.isTablet) == true) removeAppBar()
 
         initListeners()
+        initToolbarListener()
     }
 
     private fun removeAppBar() {
         binding.toolbar.visibility = View.GONE
+    }
+
+    private fun initToolbarListener() {
+        binding.appbarlayout.addOnOffsetChangedListener(object :
+            AppBarLayout.OnOffsetChangedListener {
+            var isShow: Boolean? = null
+            var scrollRange: Int = -1
+
+
+            override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout!!.totalScrollRange;
+                }
+                if (scrollRange + verticalOffset == 0) {
+                    binding.toolbar.title = detailViewModel.showTitle
+                    isShow = true;
+
+                } else if (isShow == true) {
+                    binding.toolbar.title = ""
+                    isShow = false;
+                }
+            }
+
+        });
     }
 
 
