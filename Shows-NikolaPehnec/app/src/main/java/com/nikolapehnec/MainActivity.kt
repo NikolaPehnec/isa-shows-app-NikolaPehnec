@@ -21,10 +21,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         ApiModule.initRetrofit(getPreferences(Context.MODE_PRIVATE))
-
-        val isTablet = resources?.getBoolean(R.bool.isTablet)
-        if (isTablet == true) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        }
+        
     }
 }
