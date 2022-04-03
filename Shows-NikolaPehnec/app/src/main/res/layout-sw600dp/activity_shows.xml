@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
@@ -9,71 +10,126 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="0.3"
         android:orientation="vertical"
         android:paddingTop="20dp"
         android:paddingBottom="20dp">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
             android:weightSum="1">
 
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar2"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/profilePicture"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="end"
+                    android:layout_margin="20dp"
+                    android:padding="1dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_profile_placeholder"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
+            </androidx.appcompat.widget.Toolbar>
+
+
             <TextView
+                android:id="@+id/title"
                 style="@style/titleBlack"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="0.8"
-                android:text="@string/shows" />
+                android:text="@string/shows"
+                app:layout_constraintEnd_toStartOf="@+id/topRatedShowsButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/toolbar2" />
 
-            <ImageView
-                android:id="@+id/logoutButton"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/topRatedShowsButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginEnd="20dp"
-                android:layout_weight="0.2"
-                android:paddingTop="10dp"
-                android:scaleType="fitEnd"
-                android:src="@drawable/ic_logout_button" />
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/white"
+                android:text="Top rated"
+                android:textAllCaps="false"
+                android:textColor="@color/background"
+                app:cornerRadius="32dp"
+                app:icon="@drawable/ic_heart_icon"
+                app:iconTint="@color/background"
+                app:layout_constraintBottom_toBottomOf="@+id/title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:strokeColor="@color/background" />
 
-        </LinearLayout>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/showsRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title"
+                tools:listitem="@layout/view_show_item" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/showsRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:listitem="@layout/view_show_item" />
+            <LinearLayout
+                android:id="@+id/noShowsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title">
 
-        <LinearLayout
-            android:id="@+id/noShowsLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:visibility="gone">
+                <ImageView
+                    android:id="@+id/noShowsImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:foregroundGravity="center_vertical"
+                    android:src="@drawable/ic_shows_empty_state">
 
-            <ImageView
-                android:id="@+id/noShowsImage"
+                </ImageView>
+
+                <TextView
+                    android:id="@+id/noShowsMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/noShowsMessage" />
+            </LinearLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/orientationFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_shows_empty_state">
+                android:layout_margin="24dp"
+                android:backgroundTint="@color/background"
+                android:src="@drawable/ic_fab_landscape"
+                app:borderWidth="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:tint="@color/white" />
 
-            </ImageView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
-                android:id="@+id/noShowsMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="15dp"
-                android:text="@string/noShowsMessage" />
-        </LinearLayout>
     </LinearLayout>
 
 

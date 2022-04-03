@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="4dp"
-    android:paddingRight="4dp">
+    tools:parentTag="android.widget.FrameLayout">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -60,4 +59,4 @@
 
     </androidx.cardview.widget.CardView>
 
-</FrameLayout>
+</merge>

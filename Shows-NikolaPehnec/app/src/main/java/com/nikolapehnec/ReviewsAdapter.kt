@@ -2,6 +2,7 @@ package com.nikolapehnec
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -13,7 +14,7 @@ class ReviewsAdapter(
 ) : RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
-        var binding = ItemReviewBinding.inflate(LayoutInflater.from(parent.context))
+        var binding = ItemReviewBinding.inflate(LayoutInflater.from(parent.context),parent,false)
 
         return ReviewViewHolder(binding)
     }
@@ -47,6 +48,8 @@ class ReviewsAdapter(
                     .into(binding.reviewImage)
             }
             binding.reviewText.text = item.comment
+            if (item.comment.equals(""))
+                binding.reviewText.isVisible = false
             binding.reviewUsername.text = item.user.email
             binding.reviewGrade.text = item.rating.toString()
         }

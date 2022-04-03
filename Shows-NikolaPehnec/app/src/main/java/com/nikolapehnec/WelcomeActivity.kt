@@ -2,6 +2,7 @@ package com.nikolapehnec
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.nikolapehnec.databinding.ActivityWelcomeBinding
@@ -31,5 +32,8 @@ class WelcomeActivity : AppCompatActivity() {
                 getString(R.string.welcome_mess), username[0]
             )
         }
+
+
+
     }
 }
