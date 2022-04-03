@@ -18,6 +18,9 @@ interface ShowsApiService {
     @GET("/shows")
     fun getShows(): Call<ShowResponse>
 
+    @GET("/shows/top_rated")
+    fun getTopRatedShows(): Call<ShowResponse>
+
     @GET("/shows/{show_id}/reviews")
     fun getReviewsForShow(@Path("show_id") id: Int): Call<ReviewResponse>
 
@@ -27,8 +30,8 @@ interface ShowsApiService {
     @Multipart
     @PUT("/users")
     fun updateImage(
-        @Part("id") id: RequestBody,
-        @Part("email") email: RequestBody,
+       // @Part("id") id: RequestBody,
+       // @Part("email") email: RequestBody,
         @Part image_url: MultipartBody.Part
     ): Call<LoginResponse>
 }
