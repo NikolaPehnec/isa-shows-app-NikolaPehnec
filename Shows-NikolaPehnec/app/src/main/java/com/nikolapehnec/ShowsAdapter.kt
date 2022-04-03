@@ -1,24 +1,25 @@
 package com.nikolapehnec
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.nikolapehnec.databinding.ViewShowItemBinding
 import com.nikolapehnec.model.Show
 
 class ShowsAdapter(
     private var items: List<Show>,
-    private val onClickCallback: (String) -> Unit
+    private val tablet: Boolean,
+    private val onClickCallback: (String, String, String, String) -> Unit
 ) : RecyclerView.Adapter<ShowsAdapter.ShowViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShowViewHolder {
-        var binding = ViewShowItemBinding.inflate(LayoutInflater.from(parent.context))
+    private var landscape: Boolean = true
 
-        return ShowViewHolder(binding)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShowViewHolder {
+        val showCardView = ShowCardView(parent.context)
+        return ShowViewHolder(showCardView)
     }
 
     override fun onBindViewHolder(holder: ShowViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(items[position], position, tablet)
     }
 
     override fun getItemCount(): Int {
@@ -30,18 +31,32 @@ class ShowsAdapter(
         notifyDataSetChanged()
     }
 
+    fun verticalLayout() {
+        landscape = false
+    }
 
-    inner class ShowViewHolder(private val binding: ViewShowItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    fun horizontalLayout() {
+        landscape = true
+    }
 
-        fun bind(item: Show) {
-            binding.showName.text = item.name
-            binding.showDescription.text = item.description
-            binding.showImage.setImageResource(item.imageResourceId)
 
-            binding.root.setOnClickListener {
-                onClickCallback(item.id)
+    inner class ShowViewHolder(private val showCardView: ShowCardView) :
+        RecyclerView.ViewHolder(showCardView.rootView) {
+
+        fun bind(item: Show, position: Int, tablet: Boolean) {
+            showCardView.setTitle(item.title)
+            showCardView.setDescription(item.description)
+            showCardView.setImage(item.imgUrl)
+            showCardView.setClickListener(
+                onClickCallback,
+                item.id, item.title, item.description!!, item.imgUrl
+            )
+
+            //Prvi show odabran u tablet modeu
+            if(position==0 && tablet){
+                showCardView.performClick()
             }
+            showCardView.binding.showDescription.isVisible = landscape
         }
     }
 

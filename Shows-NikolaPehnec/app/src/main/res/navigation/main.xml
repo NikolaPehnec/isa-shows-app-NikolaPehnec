@@ -3,19 +3,42 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    app:startDestination="@id/login">
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.nikolapehnec.SplashFragment"
+        tools:layout="@layout/fragment_splash">
+
+        <action
+            android:id="@+id/actionToLogin"
+            app:destination="@id/login"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/login"
         android:name="com.nikolapehnec.LoginFragment"
-        tools:layout="@layout/activity_login">
+        tools:layout="@layout/fragment_login">
 
         <action
             android:id="@+id/actionLoginToShows"
             app:destination="@id/shows"
             app:popUpTo="@id/login"
             app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/actionLoginToRegister"
+            app:destination="@id/register"
+            app:popUpTo="@id/register"
+            app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/register"
+        android:name="com.nikolapehnec.RegisterFragment"
+        tools:layout="@layout/fragment_register" />
 
     <fragment
         android:id="@+id/shows"
@@ -36,7 +59,7 @@
     <fragment
         android:id="@+id/showDetail"
         android:name="com.nikolapehnec.ShowDetailFragment"
-        tools:layout="@layout/activity_show_details">
+        tools:layout="@layout/fragment_show_details">
 
         <argument
             android:name="showId"

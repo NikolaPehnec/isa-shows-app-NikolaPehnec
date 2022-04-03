@@ -6,75 +6,134 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.nikolapehnec.databinding.ActivityShowDetailsBinding
 import com.nikolapehnec.databinding.DialogAddReviewBinding
+import com.nikolapehnec.databinding.FragmentShowDetailsBinding
 import com.nikolapehnec.model.Review
-import com.nikolapehnec.model.Show
+import com.nikolapehnec.viewModel.ShowDetailsViewModelFactory
+import com.nikolapehnec.viewModel.ShowsDetailsSharedViewModel
 
 class ShowDetailFragment : Fragment() {
-
-    private var _binding: ActivityShowDetailsBinding? = null
+    private var _binding: FragmentShowDetailsBinding? = null
     private val binding get() = _binding!!
-
-    //val args: ShowDetailFragmentArgs by navArgs()
-
     private var adapter: ReviewsAdapter? = null
-    private var showId: Int? = 0
-    private val detailViewModel: ShowsDetailsViewModel by viewModels()
 
+    //Ne treba factory jer je vec kreiran u ShowsFragmentu
+    /*private val detailViewModel: ShowsDetailsSharedViewModel by activityViewModels()*/
+    private val detailViewModel: ShowsDetailsSharedViewModel by activityViewModels() {
+        ShowDetailsViewModelFactory(
+            (activity?.application as ShowsApp).showsDatabase!!,
+            requireContext()
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        _binding = ActivityShowDetailsBinding.inflate(inflater, container, false)
+    ): View {
+        _binding = FragmentShowDetailsBinding.inflate(inflater, container, false)
         return binding.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        checkInternetConnection()
+        detailViewModel.getReviewsByShowId()
 
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            "showId",
-            viewLifecycleOwner
-        ) { key, result ->
-            showId = result.getString("showId")?.toInt()
-            showId?.let {
-                detailViewModel.initShow(it)
+        detailViewModel.getReviewsLiveData().observe(viewLifecycleOwner, { reviews ->
+            binding.progressCircular.isVisible = false
+
+            if (reviews != null) {
+                val reviewsModel: List<Review> = reviews.map {
+                    Review(it.id.toString(), it.comment, it.rating, it.showId.toInt(), it.user)
+                }
+                loadUI(reviewsModel)
+                initRecyclerView(reviewsModel)
             }
-            //Toast.makeText(requireContext(), showId?.toString(), Toast.LENGTH_SHORT).show()
-        }
+        })
 
-        detailViewModel.getShowsLiveData().observe(viewLifecycleOwner, { show ->
-            loadUI(show)
-            initRecyclerView(show)
+        detailViewModel.getPostReviewResultLiveData().observe(viewLifecycleOwner, { isSuccesful ->
+            binding.progressCircular.isVisible = false
+
+            if (isSuccesful) {
+                detailViewModel.getReviewsByShowId()
+            } else {
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle(getString(R.string.postingReviewUnsuccesful))
+                if (detailViewModel.getMessage() != null) {
+                    builder.setMessage(detailViewModel.getMessage())
+                } else {
+                    builder.setMessage(getString(R.string.postingReviewUnsuccesfuMess))
+                }
+                builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+                }
+
+                builder.show()
+            }
         })
 
         if (context?.resources?.getBoolean(R.bool.isTablet) == true) removeAppBar()
 
-
         initListeners()
+        initToolbarListener()
     }
 
     private fun removeAppBar() {
         binding.toolbar.visibility = View.GONE
     }
 
+    private fun initToolbarListener() {
+        binding.appbarlayout.addOnOffsetChangedListener(object :
+            AppBarLayout.OnOffsetChangedListener {
+            var isShow: Boolean? = null
+            var scrollRange: Int = -1
 
-    private fun loadUI(show: Show) {
-        binding.showName.text = show.name
-        binding.longDescription.text = show.longDescription
-        binding.showImage.setImageResource(show.imageResourceId)
+
+            override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout!!.totalScrollRange;
+                }
+                if (scrollRange + verticalOffset == 0) {
+                    binding.toolbar.title = detailViewModel.showTitle
+                    isShow = true;
+
+                } else if (isShow == true) {
+                    binding.toolbar.title = ""
+                    isShow = false;
+                }
+            }
+
+        });
+    }
+
+
+    private fun loadUI(reviews: List<Review>) {
+        binding.showName.text = detailViewModel.showTitle
+        binding.longDescription.text = detailViewModel.showDesc
+
+        val options: RequestOptions = RequestOptions().centerCrop()
+        this.view?.let {
+            Glide.with(it).load(detailViewModel.imgUrl).diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true).apply(options).into(binding.showImage)
+            binding.showImage.isVisible = true
+        }
 
         detailViewModel.calculateAverageGrade()?.let { grade ->
             binding.numReviews.text = String.format(
-                getString(R.string.averageGrade), show.reviews.size, grade
+                getString(R.string.averageGrade), reviews.size, grade
             )
             binding.ratingBar.rating = grade
         }
@@ -83,9 +142,6 @@ class ShowDetailFragment : Fragment() {
 
     private fun initListeners() {
         binding.toolbar.setNavigationOnClickListener {
-            //Finish fragment, pop -> showsFragment
-            //findNavController().navigateUp()
-            //Isto pop, ako nema nista na backstacku finish
             activity?.onBackPressed()
         }
 
@@ -94,11 +150,11 @@ class ShowDetailFragment : Fragment() {
         }
     }
 
-    private fun initRecyclerView(show: Show) {
+    private fun initRecyclerView(reviews: List<Review>) {
         binding.reviewsRecyclerView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ReviewsAdapter(show.reviews)
+        adapter = ReviewsAdapter(reviews)
         binding.reviewsRecyclerView.adapter = adapter
 
         if (adapter?.itemCount?.compareTo(0) == 0) {
@@ -108,27 +164,42 @@ class ShowDetailFragment : Fragment() {
     }
 
     private fun showBottomSheet() {
-        val dialog = BottomSheetDialog(requireContext())
+        val dialog =
+            BottomSheetDialog(requireContext(), android.R.style.Theme_Translucent_NoTitleBar)
         val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
 
-        dialogBinding.editReviewInput.requestFocus()
+        dialog.behavior.peekHeight = 1000
 
-        val sharedPref =
-            activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
-        val username = sharedPref?.getString(getString(R.string.username), "")
+        binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
+
+        dialog.setOnDismissListener {
+            binding.layout.setBackgroundColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.white
+                )
+            )
+        }
+
+        dialogBinding.editReviewInput.requestFocus()
 
         dialogBinding.submitButton.setOnClickListener {
             if (dialogBinding.ratingBarReview.rating.compareTo(0.0) == 0) {
-                Toast.makeText(requireContext(), "Rating is mandatory!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.ratingMandatory),
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
-                val review = Review(
-                    username.toString(),
-                    dialogBinding.editReviewInput.text.toString(),
+                checkInternetConnection()
+
+                detailViewModel.postReview(
                     dialogBinding.ratingBarReview.rating.toInt(),
-                    R.drawable.ic_profile_placeholder
+                    dialogBinding.editReviewInput.text.toString(),
+                    detailViewModel.showId.toString(),
+                    activity?.getPreferences(Context.MODE_PRIVATE)!!
                 )
-                detailViewModel.addReview(review)
 
                 dialog.dismiss()
 
@@ -145,6 +216,27 @@ class ShowDetailFragment : Fragment() {
         }
 
         dialog.show()
+    }
+
+    private fun checkInternetConnection() {
+        val networkChecker = NetworkChecker(requireContext())
+        if (!networkChecker.isOnline()) {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle(getString(R.string.notification))
+            builder.setMessage(getString(R.string.noInternet))
+
+            builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+            }
+
+            builder.show()
+        } else {
+            binding.progressCircular.isVisible = true
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
 

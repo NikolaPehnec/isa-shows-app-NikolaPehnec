@@ -1,8 +1,14 @@
 package com.nikolapehnec
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import com.nikolapehnec.databinding.ActivityMainBinding
+import com.nikolapehnec.networking.ApiModule
+import com.nikolapehnec.viewModel.ShowDetailsViewModelFactory
+import com.nikolapehnec.viewModel.ShowsDetailsSharedViewModel
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,5 +19,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         supportActionBar?.hide()
         setContentView(binding.root)
+
+        ApiModule.initRetrofit(getPreferences(Context.MODE_PRIVATE))
+        
     }
 }

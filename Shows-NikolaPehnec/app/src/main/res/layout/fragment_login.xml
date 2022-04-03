@@ -13,6 +13,19 @@
         android:paddingBottom="25dp"
         tools:context=".LoginFragment">
 
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress_circular"
+            style="Widget.MaterialComponents.CircularProgressIndicator.Medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/registerButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageView
             android:id="@+id/topLeftIl"
             android:layout_width="wrap_content"
@@ -92,6 +105,7 @@
                 android:id="@+id/editEmailInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
                 android:textColor="@color/white" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -105,6 +119,7 @@
             android:hint="Password"
             app:endIconMode="password_toggle"
             app:endIconTint="@color/white"
+            app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="@id/emailInput"
             app:layout_constraintStart_toStartOf="@id/emailInput"
             app:layout_constraintTop_toBottomOf="@+id/emailInput">
@@ -136,7 +151,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:layout_marginBottom="20dp"
-            android:background="@drawable/ic_button_gray"
+            android:background="@drawable/button_colors"
             android:enabled="false"
             android:text="@string/login"
             android:textAllCaps="false"
@@ -144,6 +159,23 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/rememberMeCB" />
+
+        <android.widget.Button
+            android:id="@+id/registerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/button_register_colors"
+            android:text="@string/register"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loginButton" />
+
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

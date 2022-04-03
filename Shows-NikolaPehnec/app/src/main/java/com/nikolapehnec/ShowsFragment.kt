@@ -2,31 +2,44 @@ package com.nikolapehnec
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.database.Cursor
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.os.bundleOf
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.net.toFile
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.google.android.gms.common.util.IOUtils.copyStream
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nikolapehnec.databinding.ActivityShowsBinding
 import com.nikolapehnec.databinding.DialogShowsMenuBinding
 import com.nikolapehnec.model.Show
+import com.nikolapehnec.viewModel.ShowDetailsViewModelFactory
+import com.nikolapehnec.viewModel.ShowsDetailsSharedViewModel
+import com.nikolapehnec.viewModel.ShowsViewModel
+import com.nikolapehnec.viewModel.ShowsViewModelFactory
 import java.io.File
-
+import java.io.FileOutputStream
 
 class ShowsFragment : Fragment() {
-
     private var _binding: ActivityShowsBinding? = null
     private val binding get() = _binding!!
     private var _dialogBinding: DialogShowsMenuBinding? = null
@@ -35,7 +48,20 @@ class ShowsFragment : Fragment() {
     private var adapter: ShowsAdapter? = null
     private var profileImage: File? = null
 
-    private val viewModel: ShowsViewModel by viewModels()
+    private var landscapeOrientation: Boolean = true
+    private var topRatedShows: Boolean = false
+    private var changeShows: Boolean = false
+
+    private val viewModel: ShowsViewModel by activityViewModels() {
+        ShowsViewModelFactory((activity?.application as ShowsApp).showsDatabase!!, requireContext())
+    }
+
+    private val detailViewModel: ShowsDetailsSharedViewModel by activityViewModels() {
+        ShowDetailsViewModelFactory(
+            (activity?.application as ShowsApp).showsDatabase!!,
+            requireContext()
+        )
+    }
 
     private val cameraPermissionForProfilePicture =
         preparePermissionsContract(onPermissionsGranted = {
@@ -49,23 +75,68 @@ class ShowsFragment : Fragment() {
                 )
             }
 
-            cameraContract.launch(avatarUri)
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle(getString(R.string.imageOption))
+            builder.setMessage(getString(R.string.imageOptionMess))
+
+            builder.setPositiveButton(getString(R.string.fromCamera)) { _, _ ->
+                cameraContract.launch(avatarUri)
+            }
+            builder.setNeutralButton(getString(R.string.fromMemory)) { _, _ ->
+                pickImageContract.launch("image/*")
+            }
+
+            builder.show()
         })
 
     private val cameraContract = prepareCameraContract(onSuccess = {
         profileImage = FileUtil.getImageFile(requireContext())
 
         dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
-        binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        binding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+
+        if (profileImage != null) {
+            viewModel.sendPicture(profileImage!!.path, sharedPref!!)
+        }
+    })
+
+    private val pickImageContract = prepareGalleryContract(onUri = {
+        if (it != null && it.path != null) {
+            if (Build.VERSION.SDK_INT < 28) {
+                dialogBinding.profilePicture.setImageBitmap(
+                    MediaStore.Images.Media.getBitmap(
+                        requireContext().contentResolver,
+                        it
+                    )
+                )
+                binding.profilePicture.setImageBitmap(
+                    MediaStore.Images.Media.getBitmap(
+                        requireContext().contentResolver,
+                        it
+                    )
+                )
+            } else {
+                val source = ImageDecoder
+                    .createSource(requireContext().contentResolver, it)
+                dialogBinding.profilePicture.setImageBitmap(ImageDecoder.decodeBitmap(source))
+                binding.profilePicture.setImageBitmap(ImageDecoder.decodeBitmap(source))
+            }
+
+            val uri = getFilePathFromUri(it)
+            var file = uri!!.toFile()
+            file = FileUtil.makeImageSmaller(file)
+            viewModel.sendPicture(file.path, sharedPref!!)
+        }
+
     })
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = ActivityShowsBinding.inflate(inflater, container, false)
-        sharedPref = activity?.applicationContext?.getSharedPreferences("1", Context.MODE_PRIVATE)
+        sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
         return binding.root
     }
 
@@ -79,24 +150,99 @@ class ShowsFragment : Fragment() {
             initRecyclerView()
         }
 
-        viewModel.getShowsLiveData().observe(viewLifecycleOwner, { shows ->
-            updateShows(shows)
+        viewModel.getShowsEntityLiveData().observe(viewLifecycleOwner, { shows ->
+            binding.progressCircular?.isVisible = false
+
+            if (shows != null) {
+                if (shows.size == 0) {
+                    binding.showsRecycler.isVisible = false
+                    binding.noShowsLayout.isVisible = true
+                } else {
+                    binding.showsRecycler.isVisible = true
+                    binding.noShowsLayout.isVisible = false
+                    updateShows(shows.map {
+                        Show(
+                            it.id,
+                            it.avgRating,
+                            it.description,
+                            it.imgUrl,
+                            it.numOfReviews,
+                            it.title
+                        )
+                    })
+                }
+            }
         })
 
-        viewModel.initShows()
+        //Ako sam koristio isti live data nije se u nekim slucajevima pozvao observe
+        viewModel.getTopRatedShowsEntityLiveData().observe(viewLifecycleOwner, { shows ->
+            binding.progressCircular?.isVisible = false
+
+            if (shows != null) {
+                if (shows.size == 0) {
+                    binding.showsRecycler.isVisible = false
+                    binding.noShowsLayout.isVisible = true
+                } else {
+                    binding.showsRecycler.isVisible = true
+                    binding.noShowsLayout.isVisible = false
+                    updateShows(shows.map {
+                        Show(
+                            it.id,
+                            it.avgRating,
+                            it.description,
+                            it.imgUrl,
+                            it.numOfReviews,
+                            it.title
+                        )
+                    })
+                }
+            }
+        })
+
+        viewModel.getErrorMessageLiveData().observe(viewLifecycleOwner, { message ->
+            binding.progressCircular?.isVisible = false
+
+            if (topRatedShows == true) {
+                binding.topRatedShowsButton.apply {
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.background))
+                    backgroundTintList =
+                        ContextCompat.getColorStateList(requireContext(), R.color.white)
+                    iconTint = ContextCompat.getColorStateList(requireContext(), R.color.background)
+                }
+
+                topRatedShows = false
+
+                if (message != null) {
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setTitle(getString(R.string.loadingUnSuccesful))
+                    builder.setMessage(message)
+                    builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+                    }
+
+                    builder.show()
+                }
+
+            }
+        })
+
+        binding.progressCircular?.isVisible = true
+        viewModel.getShows()
 
         initListeners()
         populateUI()
+        checkInternetConnection()
     }
 
     private fun populateUI() {
-        if (FileUtil.getImageFile(requireContext()) != null) {
-            profileImage = FileUtil.getImageFile(requireContext())
-            binding.profilePicture?.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        val imgUrl = sharedPref?.getString(getString(R.string.imgUrl), "null")
+        if (imgUrl != "null") {
+            binding.profilePicture?.let { Glide.with(this).load(imgUrl).into(it) }
         }
     }
 
     private fun updateShows(shows: List<Show>) {
+        if (!changeShows && adapter?.itemCount?.compareTo(0) != 0) return
+
         adapter?.setItems(shows)
 
         if (adapter?.itemCount?.compareTo(0) == 0) {
@@ -106,20 +252,22 @@ class ShowsFragment : Fragment() {
             binding.showsRecycler.isVisible = true
             binding.noShowsLayout.isVisible = false
         }
+
+        changeShows = false
     }
 
     private fun initRecyclerView() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(emptyList()) { id ->
+        adapter = ShowsAdapter(emptyList(), false) { id, title, description, imageurl ->
             run {
                 ShowsFragmentDirections.actionShowToDetail(id.toInt()).also { action ->
+                    detailViewModel.showId = id.toInt()
+                    detailViewModel.showTitle = title
+                    detailViewModel.showDesc = description
+                    detailViewModel.imgUrl = imageurl
 
-                    requireActivity().supportFragmentManager.setFragmentResult(
-                        "showId",
-                        bundleOf("showId" to id)
-                    )
                     findNavController().navigate(action)
                 }
             }
@@ -136,10 +284,12 @@ class ShowsFragment : Fragment() {
         binding.showsRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        adapter = ShowsAdapter(emptyList()) { id ->
+        adapter = ShowsAdapter(emptyList(), true) { id, title, description, imageurl ->
             run {
-
-                setFragmentResult("showId", bundleOf("showId" to id))
+                detailViewModel.showId = id.toInt()
+                detailViewModel.showTitle = title
+                detailViewModel.showDesc = description
+                detailViewModel.imgUrl = imageurl
                 navHostFragment.navController.navigate(R.id.showDetail)
             }
         }
@@ -149,34 +299,96 @@ class ShowsFragment : Fragment() {
 
 
     private fun initListeners() {
-        /*binding.hideShowsButton?.setOnClickListener {
-            if (adapter?.itemCount?.compareTo(0) != 0) {
-                adapter?.setItems(listOf())
-                binding.showsRecycler.isVisible = false
-                binding.noShowsLayout.isVisible = true
-                binding.hideShowsButton?.text = getString(R.string.showShows)
-            } else {
-                adapter?.setItems(ShowsResource.shows)
-                binding.showsRecycler.isVisible = true
-                binding.noShowsLayout.isVisible = false
-                binding.hideShowsButton?.text = getString(R.string.hideShows)
-            }
-        }*/
-
         binding.profilePicture?.setOnClickListener {
             showBottomSheet()
+        }
+
+        initTopRatedListeners()
+        initOrientationListeners()
+    }
+
+    private fun initOrientationListeners() {
+        binding.orientationFab?.setOnClickListener {
+            if (landscapeOrientation) {
+                binding.orientationFab?.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.ic_fab_vertical,
+                        null
+                    )
+                )
+                binding.showsRecycler.layoutManager = GridLayoutManager(requireContext(), 2)
+                adapter?.verticalLayout()
+                landscapeOrientation = false
+            } else {
+                binding.orientationFab?.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.ic_fab_landscape,
+                        null
+                    )
+                )
+                adapter?.horizontalLayout()
+
+                binding.showsRecycler.layoutManager =
+                    LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+                landscapeOrientation = true
+            }
+        }
+    }
+
+    private fun initTopRatedListeners() {
+        binding.topRatedShowsButton.apply {
+            setOnClickListener {
+                changeShows = true
+
+                if (!topRatedShows) {
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                    backgroundTintList =
+                        ContextCompat.getColorStateList(requireContext(), R.color.background)
+                    iconTint = ContextCompat.getColorStateList(requireContext(), R.color.white)
+                    topRatedShows = true
+
+                    binding.progressCircular?.isVisible = true
+                    viewModel.getTopRatedShows()
+                } else {
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.background))
+                    backgroundTintList =
+                        ContextCompat.getColorStateList(requireContext(), R.color.white)
+                    iconTint = ContextCompat.getColorStateList(requireContext(), R.color.background)
+                    topRatedShows = false
+
+                    binding.progressCircular?.isVisible = true
+                    viewModel.getShows()
+                }
+            }
         }
     }
 
     private fun showBottomSheet() {
-        val dialog = BottomSheetDialog(requireContext())
+        val dialog =
+            BottomSheetDialog(requireContext(), android.R.style.Theme_Translucent_NoTitleBar)
         _dialogBinding = DialogShowsMenuBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
         dialogBinding.userEmail.text = sharedPref?.getString(getString(R.string.username), "")
 
-        if (FileUtil.getImageFile(requireContext()) != null) {
-            profileImage = FileUtil.getImageFile(requireContext())
-            dialogBinding.profilePicture.setImageBitmap(BitmapFactory.decodeFile(profileImage?.path))
+        //inace se ne vidi dobro na tabletu
+        dialog.behavior.peekHeight = 2000
+
+        binding.layout.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
+
+        dialog.setOnDismissListener {
+            binding.layout.setBackgroundColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.white
+                )
+            )
+        }
+
+        val imgUrl = sharedPref?.getString(getString(R.string.imgUrl), "null")
+        if (imgUrl != "null") {
+            dialogBinding.profilePicture.let { Glide.with(this).load(imgUrl).into(it) }
         }
 
         initBottomSheetListeners(dialogBinding, dialog)
@@ -201,8 +413,8 @@ class ShowsFragment : Fragment() {
                     findNavController().navigate(R.id.actionLogout)
                 }
             }
-            builder.setNegativeButton(getString(R.string.no)) { dialog, _ ->
-                dialog.dismiss()
+            builder.setNegativeButton(getString(R.string.cancel)) { _, _ ->
+                bottomSheetDialog.dismiss()
             }
 
             builder.show()
@@ -211,5 +423,69 @@ class ShowsFragment : Fragment() {
         dialogBinding.changeProfilePhotoButton.setOnClickListener {
             cameraPermissionForProfilePicture.launch(arrayOf(android.Manifest.permission.CAMERA))
         }
+    }
+
+    private fun checkInternetConnection() {
+        val networkChecker = NetworkChecker(requireContext())
+        if (!networkChecker.isOnline()) {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle(getString(R.string.notification))
+            builder.setMessage(getString(R.string.noInternet))
+
+            builder.setPositiveButton(getString(R.string.Ok)) { _, _ ->
+            }
+
+            builder.show()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+
+    fun getFilePathFromUri(uri: Uri?): Uri? {
+        val fileName: String = getFileName(uri)
+        val file: File = File(requireContext().externalCacheDir, fileName)
+        file.createNewFile()
+        FileOutputStream(file).use { outputStream ->
+            requireContext().getContentResolver().openInputStream(uri!!).use { inputStream ->
+                copyStream(inputStream,outputStream)
+                outputStream.flush()
+            }
+        }
+        return Uri.fromFile(file)
+    }
+
+    fun getFileName(uri: Uri?): String {
+        var fileName: String? = getFileNameFromCursor(uri)
+        if (fileName == null) {
+            val fileExtension: String? = getFileExtension(uri)
+            fileName = "temp_file" + if (fileExtension != null) ".$fileExtension" else ""
+        } else if (!fileName.contains(".")) {
+            val fileExtension: String? = getFileExtension(uri)
+            fileName = "$fileName.$fileExtension"
+        }
+        return fileName
+    }
+
+    fun getFileExtension(uri: Uri?): String? {
+        val fileType: String? = requireContext().contentResolver.getType(uri!!)
+
+        return MimeTypeMap.getSingleton().getExtensionFromMimeType(fileType)
+    }
+
+    fun getFileNameFromCursor(uri: Uri?): String? {
+        val fileCursor: Cursor? = requireContext().contentResolver
+            .query(uri!!, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+        var fileName: String? = null
+        if (fileCursor != null && fileCursor.moveToFirst()) {
+            val cIndex: Int = fileCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (cIndex != -1) {
+                fileName = fileCursor.getString(cIndex)
+            }
+        }
+        return fileName
     }
 }

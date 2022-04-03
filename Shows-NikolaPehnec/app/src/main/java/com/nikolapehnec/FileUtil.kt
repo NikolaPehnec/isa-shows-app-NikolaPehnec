@@ -40,7 +40,7 @@ object FileUtil {
     /**
      * Api has restriction to 1MB size so we have to make image smaller before upload.
      */
-    private fun makeImageSmaller(file: File): File {
+     fun makeImageSmaller(file: File): File {
         val bitmap = fixRotation(file)
         val outputStream = FileOutputStream(file)
         bitmap.compress(CompressFormat.JPEG, COMPRESSED_IMAGE_QUALITY_PERCENTAGE, outputStream)
@@ -53,7 +53,7 @@ object FileUtil {
      * Some devices use camera in landscape mode by default so we need to rotate it properly.
      */
     private fun fixRotation(file: File): Bitmap {
-        val ei = ExifInterface(file.path)
+        val ei = ExifInterface(file.absolutePath)
         val orientation: Int = ei.getAttributeInt(
             ExifInterface.TAG_ORIENTATION,
             ExifInterface.ORIENTATION_UNDEFINED
