@@ -4,6 +4,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,14 +31,24 @@ class SplashFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val displayMetrics = DisplayMetrics()
+        activity?.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
+        val translationY = displayMetrics.heightPixels * 0.50f
+
+
         with(splashBinding.triangle) {
-            animate().translationY(900f)
+            animate().translationY(translationY)
                 .setInterpolator(BounceInterpolator())
                 .setDuration(1500)
                 .withEndAction {
-                    splashBinding.title.isVisible = true
+                    //provjere zbog zatvaranja aplikacije prije dovrsetka animacije
+                    if (_binding != null) splashBinding.title.isVisible = true
                     postDelayed({
-                        findNavController().navigate(R.id.actionToLogin)
+                        try {
+                            findNavController().navigate(R.id.actionToLogin)
+                        } catch (e: IllegalStateException) {
+
+                        }
                     }, 2500)
                 }
                 .start()

@@ -13,10 +13,16 @@ import retrofit2.Response
 
 class RegistrationViewModel : ViewModel() {
 
+
+    private var message: String? = ""
     private val registrationResultLiveData: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
 
     fun getRegistrationResultLiveData(): LiveData<Boolean> {
         return registrationResultLiveData
+    }
+
+    fun getMessage(): String? {
+        return message
     }
 
     fun register(email: String, password: String, passwordConfirmation: String) {
@@ -26,11 +32,17 @@ class RegistrationViewModel : ViewModel() {
                     call: Call<RegisterResponse>,
                     response: Response<RegisterResponse>
                 ) {
+                    if (!response.isSuccessful) {
+                        message = response.errorBody()?.string()?.substringAfter("\"errors\":[\"")
+                            ?.substringBefore("\"],\"image_url\"");
+                    }
+
                     registrationResultLiveData.value = response.isSuccessful
                 }
 
                 override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
                     registrationResultLiveData.value = false
+                    message = t.message
                 }
 
             })

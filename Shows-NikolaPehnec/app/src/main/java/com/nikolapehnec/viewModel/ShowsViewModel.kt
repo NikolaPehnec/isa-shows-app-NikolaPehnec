@@ -32,6 +32,21 @@ class ShowsViewModel(
         MutableLiveData<List<ShowEntity>>()
     }
 
+    private val showEntityLiveData2: MutableLiveData<List<ShowEntity>> by lazy {
+        MutableLiveData<List<ShowEntity>>()
+    }
+
+    private val errorMessageLiveData: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
+    }
+
+    fun getErrorMessageLiveData(): LiveData<String> {
+        //inace se error pamtio i u onCreatu na povratku iz showDetaila pojavljivao
+        val err: LiveData<String> = errorMessageLiveData
+        errorMessageLiveData.value = null
+        return err
+    }
+
     fun getShowsEntityLiveData(): LiveData<List<ShowEntity>> {
         val networkChecker = NetworkChecker(context)
         if (networkChecker.isOnline()) {
@@ -39,8 +54,13 @@ class ShowsViewModel(
             return showEntityLiveData
         } else {
             Log.v("load_iz", "BAZA")
+            showEntityLiveData.value = null
             return database.showsDao().getAllShows()
         }
+    }
+
+    fun getTopRatedShowsEntityLiveData(): LiveData<List<ShowEntity>> {
+        return showEntityLiveData2
     }
 
 
@@ -83,16 +103,44 @@ class ShowsViewModel(
                     }
 
                     override fun onFailure(call: Call<ShowResponse>, t: Throwable) {
+                        //errorMessageLiveData.value=t.message
                     }
                 })
+        } else {
+            errorMessageLiveData.value = "No internet connection"
         }
     }
 
+    fun getTopRatedShows() {
+        ApiModule.retrofit.getTopRatedShows()
+            .enqueue(object : Callback<ShowResponse> {
+                override fun onResponse(
+                    call: Call<ShowResponse>,
+                    response: Response<ShowResponse>
+                ) {
+                    showEntityLiveData2.value = response.body()?.show?.map {
+                        ShowEntity(
+                            it.id,
+                            it.title,
+                            it.avgRating,
+                            it.description,
+                            it.imgUrl,
+                            it.numOfReviews
+                        )
+                    }
+                }
 
-    fun sendPicture(imgPath: String, sharedPreferences: SharedPreferences) {
-        //val userId: RequestBody = id_user.toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        //val fullName: RequestBody = email.toRequestBody("multipart/form-data".toMediaTypeOrNull())
+                override fun onFailure(call: Call<ShowResponse>, t: Throwable) {
+                    errorMessageLiveData.value = t.message
+                }
+            })
+    }
 
+
+    fun sendPicture(
+        imgPath: String?,
+        sharedPreferences: SharedPreferences,
+    ) {
         val file: File = File(imgPath)
         val requestFile: RequestBody =
             file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
@@ -111,8 +159,11 @@ class ShowsViewModel(
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                with(sharedPreferences.edit()) {
+                }
             }
         })
     }
+
 
 }
